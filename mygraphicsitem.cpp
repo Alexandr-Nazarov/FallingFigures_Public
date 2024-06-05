@@ -1,7 +1,7 @@
 #include "mygraphicsitem.h"
 
 MovingEllipse::MovingEllipse(qreal x, qreal y ,qreal width, qreal height, qreal frame_width, qreal frame_height, QAbstractGraphicsShapeItem *parent )
-    :  QAbstractGraphicsShapeItem(parent), m_x(x), m_y(y), m_width(width), m_height(height), m_frame_width(frame_width), m_frame_height(frame_height)
+    :  QAbstractGraphicsShapeItem(parent), m_x(x), m_y(y), m_width(width), m_height(height), m_frame_height(frame_height),m_frame_width(frame_width)
 
 {
 
@@ -59,7 +59,7 @@ void MovingEllipse::physics(MovingEllipse* other){
 
     //===
     //--просто движение без сталкивания с другой фигурой
-    if (this && !other){
+    if (!other){
     if (((m_y+m_height)>=(m_frame_bottom)) && m_falling ) {      //удар об нижнюю границу
         m_v_vert=-m_v_vert*m_constants.c_e;
     }
@@ -69,28 +69,44 @@ void MovingEllipse::physics(MovingEllipse* other){
 //        m_dy*=-1;
 //    }
 
-  //---- удар об другой объект
+  //==== удар об другой объект
     if (other){
 
        //--точка пересечения
         QRectF coord_Rect_1=this->mapRectToScene(this->boundingRect());         //получаем координаты ограничивающих прям-к
         QRectF coord_Rect_2=other->mapRectToScene(other->boundingRect());       //получаем координаты ограничивающих прям-к
         QRectF intersection=coord_Rect_2.intersected(coord_Rect_1);            //область пересечения
-     //    qDebug()<<intersection ;
+         qDebug()<<intersection ;
        //---
-//       if (((m_y+m_height)>=other->m_y) && m_falling && !other->m_falling ) {          //удар об другой объект при падении
-//               m_v_vert=-m_v_vert*m_constants.c_e;                                //здесь потом учесть силу удара и т.п
-//               other->m_v_vert=other->m_v_vert*other->m_constants.c_e-m_v_vert;
 
-//       } else if (((m_y+m_height)>=other->m_y) && m_falling && other->m_falling ) {
-//            m_v_vert=-m_v_vert*m_constants.c_e;
-//            other->m_v_vert=other->m_v_vert*other->m_constants.c_e-m_v_vert;
+     //--разъединение объектов
+      //  qreal tmp_height=m_height;
+     //   m_height-=intersection.height();
+      //!  m_y-=m_y+m_height-intersection.y();
+      m_y-=m_y+m_height-intersection.y()/*+intersection.height()*/;
+    //  m_y-=m_y+intersection.y();
+    //    other->m_y-=other->m_y-intersection.y();
+     //   m_height-=intersection.height();
+     //   m_y-=/*m_y+m_height-intersection.y()-*/m_y+intersection.y();
 
-//       }
+     //---
 
-       qreal tmp=m_v_vert*m_constants.c_e;
-       m_v_vert=-m_v_vert*m_constants.c_e+other->m_v_vert*other->m_constants.c_e;
-       other->m_v_vert=other->m_v_vert*other->m_constants.c_e+tmp;
+     //--скорость разслета
+        if (((m_y+m_height)>=intersection.y()) && m_falling && !other->m_falling ) {          //удар об другой объект при падении
+                m_v_vert=-m_v_vert*m_constants.c_e;                                           //здесь потом учесть массу
+                other->m_v_vert=-other->m_v_vert*other->m_constants.c_e-m_v_vert;
+
+        } else if (((m_y+m_height)>=intersection.y()) && m_falling && other->m_falling ) {
+             m_v_vert=-m_v_vert*m_constants.c_e;
+             other->m_v_vert=other->m_v_vert*other->m_constants.c_e-m_v_vert;
+
+        }
+     //--
+ //   m_height=tmp_height;
+
+//       qreal tmp=m_v_vert*m_constants.c_e;
+//       m_v_vert=-m_v_vert*m_constants.c_e+other->m_v_vert*other->m_constants.c_e;
+//       other->m_v_vert=other->m_v_vert*other->m_constants.c_e+tmp;
 
 
     }
