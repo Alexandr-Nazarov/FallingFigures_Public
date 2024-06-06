@@ -50,12 +50,16 @@ void MovingEllipse::physics(MovingEllipse* other){
     m_v_vert+=m_constants.c_g/**m_mass*/;                                  //v=v0+a*t
   //  qDebug()<<m_v_vert;
 
-    if (m_v_vert >=0) {                             //вводим признак падения, чтобы при ударе об нижнюю границу первое условие выполнилось единожды
+    if (m_v_vert >0) {                             //вводим признак падения, чтобы при ударе об нижнюю границу первое условие выполнилось единожды
         m_falling=true;
     }
     else {
         m_falling=false;
     }
+
+//    if (std::fabs(m_v_vert)<m_constants.c_g) {
+//        m_v_vert=0;
+//    }
 
     //===
     //--просто движение без сталкивания с другой фигурой
@@ -76,30 +80,37 @@ void MovingEllipse::physics(MovingEllipse* other){
         QRectF coord_Rect_1=this->mapRectToScene(this->boundingRect());         //получаем координаты ограничивающих прям-к
         QRectF coord_Rect_2=other->mapRectToScene(other->boundingRect());       //получаем координаты ограничивающих прям-к
         QRectF intersection=coord_Rect_2.intersected(coord_Rect_1);            //область пересечения
-         qDebug()<<intersection ;
+      //  qDebug()<<intersection ;
        //---
 
      //--разъединение объектов
-      //  qreal tmp_height=m_height;
-     //   m_height-=intersection.height();
       //!  m_y-=m_y+m_height-intersection.y();
-      m_y-=m_y+m_height-intersection.y()/*+intersection.height()*/;
-    //  m_y-=m_y+intersection.y();
-    //    other->m_y-=other->m_y-intersection.y();
-     //   m_height-=intersection.height();
-     //   m_y-=/*m_y+m_height-intersection.y()-*/m_y+intersection.y();
+      //!!!для встречных m_y-=m_y+m_height-intersection.y()-intersection.height()+1;
 
      //---
 
      //--скорость разслета
         if (((m_y+m_height)>=intersection.y()) && m_falling && !other->m_falling ) {          //удар об другой объект при падении
-                m_v_vert=-m_v_vert*m_constants.c_e;                                           //здесь потом учесть массу
+                m_v_vert=-m_v_vert*m_constants.c_e;                                          //здесь потом учесть массу
                 other->m_v_vert=-other->m_v_vert*other->m_constants.c_e-m_v_vert;
 
-        } else if (((m_y+m_height)>=intersection.y()) && m_falling && other->m_falling ) {
-             m_v_vert=-m_v_vert*m_constants.c_e;
-             other->m_v_vert=other->m_v_vert*other->m_constants.c_e-m_v_vert;
+                //--разъединение объектов
+           //    if (std::fabs(m_v_vert)>0.07) {
+          //        qDebug()<<std::fabs(m_v_vert);
+                m_y-=m_y+m_height-intersection.y()-intersection.height()+1;     //!
+            //   } else m_y-=0;
+                 //---
 
+
+        } else if (((m_y+m_height)>intersection.y()) && m_falling && other->m_falling ) {
+             other->m_v_vert=other->m_v_vert*other->m_constants.c_e+m_v_vert;
+             m_v_vert=-m_v_vert*m_constants.c_e;
+              //--разъединение объектов
+             //    if (std::fabs(m_v_vert)>0.07) {
+                     m_y-=1;
+             //   } else m_y-=0;
+
+              //--
         }
      //--
  //   m_height=tmp_height;
