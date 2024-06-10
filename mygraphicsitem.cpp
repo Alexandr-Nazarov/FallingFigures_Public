@@ -45,9 +45,9 @@ void MovingEllipse::physics(MovingEllipse* other){
 
   //---вертикальное движение
     //общие законы
-
+    qreal tmp_y=m_y;
     m_y+=(m_v_vert+(m_constants.c_g)/2)*m_moving;                          //расчет s=v0*t+(a*t^2)/2
-    m_v_vert+=m_constants.c_g/**m_mass*/;                                  //v=v0+a*t
+    m_v_vert+=m_constants.c_g*m_mass;                                  //v=v0+a*t
   //  qDebug()<<m_v_vert;
 
     if (m_v_vert >0) {                             //вводим признак падения, чтобы при ударе об нижнюю границу первое условие выполнилось единожды
@@ -65,7 +65,7 @@ void MovingEllipse::physics(MovingEllipse* other){
     //--просто движение без сталкивания с другой фигурой
     if (!other){
     if (((m_y+m_height)>=(m_frame_bottom)) && m_falling ) {      //удар об нижнюю границу
-        m_v_vert=-m_v_vert*m_constants.c_e;
+        m_v_vert=-m_v_vert*m_constants.c_e;                     //при отскоке от земли масса не имеет значение, только коэфф.упругости
     }
     }
    // --- удар об верхнюю точку
@@ -73,55 +73,43 @@ void MovingEllipse::physics(MovingEllipse* other){
 //        m_dy*=-1;
 //    }
 
-  //==== удар об другой объект
+  //==== удар об другой объект  //рассматриваем только для верхнего объекта относительно 3 случаев столкновения (вн-вв, вн-вн, вв-вв)
     if (other){
 
        //--точка пересечения
         QRectF coord_Rect_1=this->mapRectToScene(this->boundingRect());         //получаем координаты ограничивающих прям-к
         QRectF coord_Rect_2=other->mapRectToScene(other->boundingRect());       //получаем координаты ограничивающих прям-к
         QRectF intersection=coord_Rect_2.intersected(coord_Rect_1);            //область пересечения
-      //  qDebug()<<intersection ;
+        //  qDebug()<<intersection ;
        //---
 
      //--разъединение объектов
       //!  m_y-=m_y+m_height-intersection.y();
-      //!!!для встречных m_y-=m_y+m_height-intersection.y()-intersection.height()+1;
+      //!!!для встречных m_y-=m_y+m_height-intersection.y()-intersection.height()+1; //+1 -чтобы выйти из границы пересечения
 
      //---
 
      //--скорость разслета
-        if (((m_y+m_height)>=intersection.y()) && m_falling && !other->m_falling ) {          //удар об другой объект при падении
-                m_v_vert=-m_v_vert*m_constants.c_e;                                          //здесь потом учесть массу
-                other->m_v_vert=-other->m_v_vert*other->m_constants.c_e-m_v_vert;
+        if (((m_y+m_height)>intersection.y()) && m_falling && !other->m_falling && (m_y<other->m_y)) {    //удар об другой объект при падении
+                m_v_vert=(-m_v_vert*m_constants.c_e)/*/other->m_mass*/;                                          //здесь потом учесть массу
+                other->m_v_vert=(-other->m_v_vert*other->m_constants.c_e-m_v_vert);
+              //  m_y-=m_y+m_height-intersection.y()-intersection.height()+1;
 
-                //--разъединение объектов
-           //    if (std::fabs(m_v_vert)>0.07) {
-          //        qDebug()<<std::fabs(m_v_vert);
-                m_y-=m_y+m_height-intersection.y()-intersection.height()+1;     //!
-            //   } else m_y-=0;
-                 //---
+        } else if (((m_y+m_height)>intersection.y()) && m_falling && other->m_falling && (m_y<other->m_y)) {
+                     other->m_v_vert=other->m_v_vert*other->m_constants.c_e+m_v_vert;
+                     m_v_vert=-m_v_vert*m_constants.c_e/*/other->m_mass*/;
+                  //   m_y-=m_y+m_height-intersection.y()-intersection.height()+1;
+        }
 
-
-        } else if (((m_y+m_height)>intersection.y()) && m_falling && other->m_falling ) {
-             other->m_v_vert=other->m_v_vert*other->m_constants.c_e+m_v_vert;
-             m_v_vert=-m_v_vert*m_constants.c_e;
-              //--разъединение объектов
-             //    if (std::fabs(m_v_vert)>0.07) {
-                     m_y-=1;
-             //   } else m_y-=0;
-
-              //--
+        else if (((m_y+m_height)>intersection.y()) && !m_falling && !other->m_falling && (m_y<other->m_y)) {
+                    m_v_vert=(m_v_vert + other->m_v_vert)*m_constants.c_e/*/other->m_mass*/;
+                    other->m_v_vert=-other->m_v_vert*other->m_constants.c_e;
         }
      //--
- //   m_height=tmp_height;
-
-//       qreal tmp=m_v_vert*m_constants.c_e;
-//       m_v_vert=-m_v_vert*m_constants.c_e+other->m_v_vert*other->m_constants.c_e;
-//       other->m_v_vert=other->m_v_vert*other->m_constants.c_e+tmp;
-
 
     }
   //======
 
+    if (abs(m_y-tmp_y)<m_constants.c_z) m_y=tmp_y;      //остановка дрожания объекта
 }
 

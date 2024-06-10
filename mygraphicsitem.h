@@ -18,6 +18,7 @@ struct constants{
  //  const  int   c_hertz=5;   //частота обновления
  const qreal c_g=0.0011;  //ускорение падения
  const  qreal c_e=0.7;     //коэф-т упругости
+ const  qreal c_z=0.01;   //погрешность для замирания фигуры (против "дрожания" при остановке)
 };
 
 class MovingEllipse : public QObject, public QAbstractGraphicsShapeItem        //Важно! QObject, чтобы  конструкторе сделать connect
