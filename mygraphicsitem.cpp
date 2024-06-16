@@ -42,12 +42,13 @@ void MovingEllipse::animate(){
 
 void MovingEllipse::physics(MovingEllipse* other){
 
-
+  m_v=m_v_vert+m_v_horr;
   //---вертикальное движение
     //общие законы
 
     m_y+=(m_v_vert+(m_constants.c_g)/2)*m_moving;                         //расчет s=v0*t+(a*t^2)/2
-    m_v_vert=m_v_vert+m_constants.c_g/**m_mass*/;                                     //v=v0+a*t
+    m_v_vert=m_v_vert+m_constants.c_g;                                    //v=v0+a*t
+
 
     if (m_v_vert >0) {                             //вводим признак падения, чтобы при ударе об нижнюю границу первое условие выполнилось единожды
         m_falling=true;
@@ -61,7 +62,7 @@ void MovingEllipse::physics(MovingEllipse* other){
 
     //===
 
-    //--просто движение без сталкивания с другой фигурой
+    //--просто движение без сталкивания с другим объектом
     if (!other){
     if (((m_y+m_height)>=(m_frame_bottom)) && m_falling ) {      //удар об нижнюю границу
         m_v_vert=-m_v_vert*m_constants.c_e;                     //при отскоке от земли масса не имеет значение, только коэфф.упругости
@@ -88,33 +89,44 @@ void MovingEllipse::physics(MovingEllipse* other){
      //---
 
        //вспомогательный расчет
-        qreal a=m_v_vert+(other->m_mass*other->m_v_vert)/m_mass;
-        qreal b=(m_mass*std::pow(m_v_vert,2)+other->m_mass*std::pow(other->m_v_vert,2))/2;
+        qreal a=m_v+(other->m_mass*other->m_v)/m_mass;
+        qreal b=((m_mass*std::pow(m_v,2)+other->m_mass*std::pow(other->m_v,2))/2);
         qreal c=b-(m_mass*std::pow(a,2))/2;
         qreal d=other->m_mass*(other->m_mass+m_mass)/(2*m_mass);
 
+        //qreal e=std::abs((intersection.x()-(m_x+m_width/2))/(m_width/2))>1 ? (intersection.x()-(m_x+m_width/2)) : ((m_x+m_width/2)-intersection.x());
+        angle_conc=std::asin(/*std::abs*/(intersection.x()-(m_x+m_width/2))/(m_width/2))*180/M_PI;      //угол касания //теорема синусов// и перевод из радиан в градусы
+        qDebug()<<(intersection.x()-(m_x+m_width/2))/(m_width/2)<<angle_conc;
+        other->angle_after=std::atan(-(m_mass*std::sin(angle_conc))/(other->m_mass-m_mass*std::cos(angle_conc)))*180/M_PI;
+        angle_after=angle_conc-other->angle_after;
        //
 
-     //--скорость разслета
-        if (((m_y+m_height)>intersection.y()) && m_falling && !other->m_falling && (m_y<other->m_y)) {    //удар об другой объект при падении
+    // --скорость разслета      //РАССМОТРЕТЬ ЕЩЕ ВАРИАНТ, КОГДА диаметр шара меньше зоны столкновения
+        if (((m_y+m_height)>=intersection.y()) && m_falling && !other->m_falling && (m_y<other->m_y)) {    //удар об другой объект при падении
               //+  m_v_vert=(-m_v_vert*m_constants.c_e)/*/other->m_mass*/;
               //+  other->m_v_vert=(-other->m_v_vert*other->m_constants.c_e-m_v_vert);
 
                    //разъединение объектов
                    m_y-=m_y+m_height-intersection.y()-intersection.height()+0.5;
 
-
                   //расчет упругого отскока
-                   other->m_v_vert=(other->m_mass*a+std::sqrt(std::pow(other->m_mass*a,2)+4*d*c))/(2*d);
-                   m_v_vert=a-(other->m_mass/m_mass)*other->m_v_vert;
+
+                   //other->m_v_vert=(other->m_mass*a+std::sqrt(std::pow(other->m_mass*a,2)+4*d*c))/(2*d);
+                   //m_v_vert=a-(other->m_mass/m_mass)*other->m_v_vert;
+
+                   other->m_v=(other->m_mass*a+std::sqrt(std::pow(other->m_mass*a,2)+4*d*c))/(2*d);
+                   m_v=a-(other->m_mass/m_mass)*other->m_v;
+
+                   m_v_vert=m_v*std::cos(angle_after);
+                   other->m_v_vert=other->m_v*std::cos(other->angle_after);
+
+                   m_v_horr=m_v*std::sin(angle_after);
+                   other->m_v_horr=other->m_v*std::sin(other->angle_after);
                   //--
-                  //расчет с коэффициентом упругости
-               //   other->m_v_vert*=other->m_constants.c_e;
-               //   m_v_vert=m_v_vert*m_constants.c_e;
-                  //---
 
+                qDebug()<<"1";
 
-        } else if (((m_y+m_height)>intersection.y()) && m_falling && other->m_falling && (m_y<other->m_y)) {
+        } else if (((m_y+m_height)>=intersection.y()) && m_falling && other->m_falling && (m_y<other->m_y)) {
                   //+  other->m_v_vert=other->m_v_vert*other->m_constants.c_e+m_v_vert;
                   //+   m_v_vert=-m_v_vert*m_constants.c_e/*/other->m_mass*/;
 
@@ -123,16 +135,22 @@ void MovingEllipse::physics(MovingEllipse* other){
 
 
                   //расчет упругого отскока
-                  other->m_v_vert=(other->m_mass*a+std::sqrt(std::pow(other->m_mass*a,2)+4*d*c))/(2*d);
-                  m_v_vert=a-(other->m_mass/m_mass)*other->m_v_vert;
+               //  other->m_v_vert=(other->m_mass*a+std::sqrt(std::pow(other->m_mass*a,2)+4*d*c))/(2*d);
+               // m_v_vert=a-(other->m_mass/m_mass)*other->m_v_vert;
+                  other->m_v=(other->m_mass*a+std::sqrt(std::pow(other->m_mass*a,2)+4*d*c))/(2*d);
+                  m_v=a-(other->m_mass/m_mass)*other->m_v;
+                  m_v_vert=m_v*std::cos(angle_after);
+                  other->m_v_vert=other->m_v*std::cos(other->angle_after);
+
+
+                  m_v_horr=m_v*std::sin(angle_after);
+                  other->m_v_horr=other->m_v*std::sin(other->angle_after);
                   //--
-                  //расчет с коэффициентом упругости
-                //  other->m_v_vert*=other->m_constants.c_e;
-                //  m_v_vert*=m_constants.c_e;
-                  //---
+
+                  qDebug()<<"2";
         }
 
-        else if (((m_y+m_height)>intersection.y()) && !m_falling && !other->m_falling && (m_y<other->m_y)) {
+        else if (((m_y+m_height)>=intersection.y()) && !m_falling && !other->m_falling && (m_y<other->m_y)) {
                  //   m_v_vert=(m_v_vert + other->m_v_vert)*m_constants.c_e/*/other->m_mass*/;
                  //   other->m_v_vert=-other->m_v_vert*other->m_constants.c_e;
 
@@ -141,18 +159,131 @@ void MovingEllipse::physics(MovingEllipse* other){
 
                  //расчет упругого отскока
 
-                 other->m_v_vert=(other->m_mass*a+std::sqrt(std::pow(other->m_mass*a,2)+4*d*c))/(2*d);
-                 m_v_vert=a-(other->m_mass/m_mass)*other->m_v_vert;
+                //other->m_v_vert=(other->m_mass*a+std::sqrt(std::pow(other->m_mass*a,2)+4*d*c))/(2*d);
+                // m_v_vert=a-(other->m_mass/m_mass)*other->m_v_vert;
+                 other->m_v=(other->m_mass*a+std::sqrt(std::pow(other->m_mass*a,2)+4*d*c))/(2*d);
+                 m_v=a-(other->m_mass/m_mass)*other->m_v;
+
+                 m_v_vert=m_v*std::cos(angle_after);
+                 other->m_v_vert=other->m_v*std::cos(other->angle_after);
+
+
+                 m_v_horr=m_v*std::sin(angle_after);
+                 other->m_v_horr=other->m_v*std::sin(other->angle_after);
                  //--
-                 //расчет с коэффициентом упругости
-             //    other->m_v_vert*=other->m_constants.c_e;
-              //   m_v_vert*=m_constants.c_e;
-                 //---
+
+            qDebug()<<"3";
         }
      //--
+
+
 
     }
   //======
 
+  //---горизонтальное движение
+       //общие законы
+        m_x+=m_v_horr*m_moving;
+        if (m_v_horr >0) {                             //вводим признак падения, чтобы при ударе об нижнюю границу первое условие выполнилось единожды
+            m_toright=true;
+        }
+        else {
+            m_toright=false;
+        }
+        if (m_x+m_width>m_frame_width) m_x=m_frame_width-m_width;
+        if (m_x<m_frame_left) m_x=m_frame_left;
+
+        //===
+
+        //--просто движение без сталкивания с другим объектом
+        if (!other){
+        if (((m_x+m_width)>=(m_frame_width)) && m_toright ) {      //удар об правую границу
+            m_v_horr=-m_v_horr*m_constants.c_e;
+        }
+        if ((m_x<=m_frame_left) && !m_toright ) {                  //удар об левую границу
+            m_v_horr=-m_v_horr*m_constants.c_e;
+        }
+        if ((m_y+m_height)>=(m_frame_bottom)){                     //торможение при касании нижней границы
+            m_v_horr=m_v_horr*m_constants.c_e;
+        }
+
+        }
+
+
+      //
+
+        //==== удар об другой объект  //рассматриваем только для верхнего объекта относительно 3 случаев столкновения (вн-вв, вн-вн, вв-вв)
+          if (other){
+
+           //   m_v_horr+=1;
+
+             //--точка пересечения
+              QRectF coord_Rect_1=this->mapRectToScene(this->boundingRect());         //получаем координаты ограничивающих прям-к
+              QRectF coord_Rect_2=other->mapRectToScene(other->boundingRect());       //получаем координаты ограничивающих прям-к
+              QRectF intersection=coord_Rect_2.intersected(coord_Rect_1);            //область пересечения
+             //---
+
+              //вспомогательный расчет
+//               qreal a=m_v_horr+(other->m_mass*other->m_v_horr)/m_mass;
+//               qreal b=((m_mass*std::pow(m_v_horr,2)+other->m_mass*std::pow(other->m_v_horr,2))/2);
+//               qreal c=b-(m_mass*std::pow(a,2))/2;
+//               qreal d=other->m_mass*(other->m_mass+m_mass)/(2*m_mass);
+
+              //
+
+               // --скорость разслета      //РАССМОТРЕТЬ ЕЩЕ ВАРИАНТ, КОГДА диаметр шара меньше зоны столкновения
+                   if (((m_x+m_width)>intersection.x()) && m_toright && !other->m_toright && (m_x<other->m_x)) {    //удар об другой объект при падении
+
+                              //разъединение объектов
+                              m_x-=m_x+m_width-intersection.x()-intersection.width()+0.5;
+
+                             //расчет упругого отскока
+                            //  other->m_v_horr=(other->m_mass*a+std::sqrt(std::pow(other->m_mass*a,2)+4*d*c))/(2*d);
+                            //  m_v_horr=a-(other->m_mass/m_mass)*other->m_v_horr;
+
+                            //  m_v_horr=m_v*std::sin(angle_after);
+                            //  other->m_v_horr=other->m_v*std::sin(other->angle_after);
+                             //--
+
+                             //--
+
+                           qDebug()<<"1";
+                        }
+                    else if (((m_x+m_width)>=intersection.x()) && m_toright && other->m_toright && (m_x<other->m_x)) {
+
+                       //разъединение объектов
+                       m_x-=m_x+m_width-intersection.x()-intersection.width()+0.5;
+
+                      //расчет упругого отскока
+//                       other->m_v_horr=(other->m_mass*a+std::sqrt(std::pow(other->m_mass*a,2)+4*d*c))/(2*d);
+//                       m_v_horr=a-(other->m_mass/m_mass)*other->m_v_horr;
+
+                     //  m_v_horr=m_v*std::sin(angle_after);
+                     //  other->m_v_horr=other->m_v*std::sin(other->angle_after);
+                      //--
+
+                             qDebug()<<"2";
+                   }
+
+                   else if (((m_x+m_width)>=intersection.x()) && !m_toright && !other->m_toright && (m_x<other->m_x)) {
+
+                       //разъединение объектов
+                       m_x-=m_x+m_width-intersection.x()-intersection.width()+0.5;
+
+                      //расчет упругого отскока
+//                       other->m_v_horr=(other->m_mass*a+std::sqrt(std::pow(other->m_mass*a,2)+4*d*c))/(2*d);
+//                       m_v_horr=a-(other->m_mass/m_mass)*other->m_v_horr;
+
+                      // m_v_horr=m_v*std::sin(angle_after);
+                      // other->m_v_horr=other->m_v*std::sin(other->angle_after);
+                      //--
+
+                       qDebug()<<"3";//<<m_v_horr<<other->m_v_horr<<a<<b<<c<<d;
+                   }
+                //--
+
+
+          }
+  //======
 }
 
