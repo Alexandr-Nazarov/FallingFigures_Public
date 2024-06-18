@@ -16,7 +16,7 @@ FallingFigures::FallingFigures(QWidget *parent)
     ui->radioButton_Rect->pressed();
     ui->radioButton_Rect->setChecked(true);
 
-    QObject::connect(ui->clearButton , SIGNAL(clicked()), scene, SLOT(clear()));
+    QObject::connect(ui->clearButton , SIGNAL(clicked()), scene, SLOT(refresh()));
 
 }
 

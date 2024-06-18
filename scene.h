@@ -53,6 +53,7 @@ signals:
 
 public slots:
 
+void refresh();
 
 void create_frame_of_scene();
 

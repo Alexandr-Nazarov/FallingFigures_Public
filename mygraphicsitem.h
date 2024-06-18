@@ -30,8 +30,10 @@ qreal m_x;
 qreal m_y;
 qreal m_width;
 qreal m_height;
+QPoint m_center;
 
 QTimer *m_timer;
+
 
 qreal m_v{0};          //скорость
 qreal m_v_vert{0};     //вертикальная скорость
@@ -63,8 +65,8 @@ public:
 
     void SetRect(QRectF);
 
-    void Stop_moving()  {m_v_vert=0; m_v_horr=0; m_moving=0;}               //останавливаем движение
-    void Start_moving() {m_v_vert=0; m_v_horr=0; m_moving=1;}               //начальное движение-падение
+    void Stop_moving()  {m_v=0; m_v_vert=0; m_v_horr=0; m_moving=0;}               //останавливаем движение
+    void Start_moving() {m_v=0; m_v_vert=0; m_v_horr=0; m_moving=1;}               //начальное движение-падение
 
 
 
@@ -75,6 +77,7 @@ public:
 
     void set_m_XY(qreal x, qreal y) { m_y=y; m_x=x; }
 
+    QPoint& center();       //центр фигуры
 
 protected:
 

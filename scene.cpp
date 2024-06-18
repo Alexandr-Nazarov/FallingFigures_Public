@@ -32,6 +32,14 @@ void Scene::create_frame_of_scene(){
 
 }
 
+void Scene::refresh(){
+   // m_timer->stop();
+  //  killTimer(m_timer->timerId()-1);
+    this->clear();
+  //  m_timer=new QTimer(this);
+  //  m_timer->start(5);
+}
+
 
 void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
