@@ -111,6 +111,7 @@ void MovingEllipse::physics(MovingEllipse* other){
 
   //==== удар об другой объект
     if (other){
+   if ((m_falling && !other->m_falling) || (m_falling && other->m_falling) || (!m_falling && !other->m_falling)) {
 
         if ((this->center().y()<=other->center().y())){  //рассматриваем только для верхнего объекта относительно 3 случаев столкновения (вн-вв, вн-вн, вв-вв)
 
@@ -138,22 +139,22 @@ void MovingEllipse::physics(MovingEllipse* other){
         qreal c=b-(m_mass*std::pow(a,2))/2;
         qreal d=other->m_mass*(other->m_mass+m_mass)/(2*m_mass);
 
-        //расчет угла столкновения
+        //расчет угла столкновения (подумать над вариациями (1) и (2) для улучшения)
         qreal b_ocr=std::sqrt(std::pow(intersection.x()-center().x(),2)+std::pow(intersection.y()-center().y(),2));
 
         if (std::abs(intersection.x()-center().x())<=b_ocr && b_ocr!=0){
         if (this->center().x()<=other->center().x()){
           //  angle_conc=/*M_PI/2-*/std::asin((-intersection.y()+center().y())/ b_ocr);   //!
-             angle_conc=/*M_PI/2-*/std::asin((-intersection.y()+center().y())/ b_ocr)-M_PI/2; //!! //угол касания //теорема синусов// в радианах все
-           qDebug()<< "left"<< angle_conc;
+             angle_conc=/*M_PI/2-*/std::asin((-intersection.y()+center().y())/ b_ocr)-M_PI/2; // (1)  //!! //угол касания //теорема синусов// в радианах все
+         //  qDebug()<< "left"<< angle_conc;
 
          } else {
           //   angle_conc=/*M_PI/2-*/std::asin((intersection.y()-center().y())/ b_ocr);/*+M_PI/2; *///!!
-               angle_conc=/*M_PI/2-*/std::asin((-intersection.y()+center().y())/ b_ocr);            //!!
-           qDebug()<< "right"<< angle_conc;
+               angle_conc=/*M_PI/2-*/std::asin((-intersection.y()+center().y())/ b_ocr);      // (2)      //!!
+         //  qDebug()<< "right"<< angle_conc;
          }
-       //  qDebug()<< angle_conc;
         } else { angle_conc=0;}
+
         //---
         //угол разлета
         other->angle_after=std::atan(-(m_mass*std::sin(angle_conc))/(other->m_mass-m_mass*std::cos(angle_conc)))/**180/M_PI*/;
@@ -245,7 +246,7 @@ void MovingEllipse::physics(MovingEllipse* other){
 
 
             //расчет упругого отскока
-         if ((m_falling && !other->m_falling) || (m_falling && other->m_falling) || (!m_falling && !other->m_falling)) {
+     //    if ((m_falling && !other->m_falling) || (m_falling && other->m_falling) || (!m_falling && !other->m_falling)) {
             other->m_v=(other->m_mass*a+std::sqrt(std::pow(other->m_mass*a,2)+4*d*c))/(2*d);
             m_v=a-(other->m_mass/m_mass)*other->m_v;
 
@@ -269,8 +270,9 @@ void MovingEllipse::physics(MovingEllipse* other){
                  m_x+=other->m_x+other->m_width-intersection.x()-intersection.width()+0.5;
              }
 
-           }
+
            //
+    }
     }
     }
   //======
