@@ -120,8 +120,17 @@ void MovingEllipse::physics(MovingEllipse* other){
         QRectF intersection=coord_Rect_2.intersected(coord_Rect_1);            //область пересечения
        //---
 
-
+        qreal angle_conc{0};
         //---
+
+        //разъединение объектов
+        m_y-=m_y+m_height-intersection.y()-intersection.height()+0.5;
+         if (this->center().x()<other->center().x()) {
+              m_x-=m_x+m_width-intersection.x()-intersection.width()+0.5;
+         } else {
+             m_x+=other->m_x+other->m_width-intersection.x()-intersection.width()+0.5;
+         }
+
 
        //вспомогательный расчет
         qreal a=m_v+(other->m_mass*other->m_v)/m_mass;
@@ -132,109 +141,136 @@ void MovingEllipse::physics(MovingEllipse* other){
         //расчет угла столкновения
         qreal b_ocr=std::sqrt(std::pow(intersection.x()-center().x(),2)+std::pow(intersection.y()-center().y(),2));
 
-         if (this->center().x()<=other->center().x()){
-           angle_conc=M_PI/2+std::asin((intersection.x()-center().x())/ b_ocr)/**180/M_PI*/;      //угол касания //теорема синусов// в радианах все
-        //    angle_conc=std::asin((center().x()-intersection.x())/ b_ocr);
+        if (std::abs(intersection.x()-center().x())<=b_ocr && b_ocr!=0){
+        if (this->center().x()<=other->center().x()){
+          //  angle_conc=/*M_PI/2-*/std::asin((-intersection.y()+center().y())/ b_ocr);   //!
+             angle_conc=/*M_PI/2-*/std::asin((-intersection.y()+center().y())/ b_ocr)-M_PI/2; //!! //угол касания //теорема синусов// в радианах все
            qDebug()<< "left"<< angle_conc;
 
          } else {
-           angle_conc=std::asin((intersection.x()-center().x())/ b_ocr)/**180/M_PI*/;
-          //  angle_conc=M_PI/2+std::asin((center().x()-intersection.x())/ b_ocr);
-         //     angle_conc=M_PI/2-std::asin((intersection.x()-center().x())/ b_ocr);
+          //   angle_conc=/*M_PI/2-*/std::asin((intersection.y()-center().y())/ b_ocr);/*+M_PI/2; *///!!
+               angle_conc=/*M_PI/2-*/std::asin((-intersection.y()+center().y())/ b_ocr);            //!!
            qDebug()<< "right"<< angle_conc;
          }
        //  qDebug()<< angle_conc;
-
+        } else { angle_conc=0;}
         //---
         //угол разлета
         other->angle_after=std::atan(-(m_mass*std::sin(angle_conc))/(other->m_mass-m_mass*std::cos(angle_conc)))/**180/M_PI*/;
-        angle_after=angle_conc-other->angle_after;
+        angle_after=(angle_conc-other->angle_after);
        //
 
 
-    // --скорость разслета
-            if (m_falling && !other->m_falling){    //удар об другой объект при падении
+//    // --скорость разслета
+//            if (m_falling && !other->m_falling){    //удар об другой объект при падении
 
 
-                  //расчет упругого отскока
+//                  //расчет упругого отскока
 
-                   other->m_v=(other->m_mass*a+std::sqrt(std::pow(other->m_mass*a,2)+4*d*c))/(2*d);
-                   m_v=a-(other->m_mass/m_mass)*other->m_v;
+//                   other->m_v=(other->m_mass*a+std::sqrt(std::pow(other->m_mass*a,2)+4*d*c))/(2*d);
+//                   m_v=a-(other->m_mass/m_mass)*other->m_v;
 
-                   m_v_vert=m_v*std::cos(angle_after);
-                   other->m_v_vert=other->m_v*std::cos(other->angle_after);
+//                   m_v_vert=m_v*std::cos(angle_after);
+//                   other->m_v_vert=other->m_v*std::cos(other->angle_after);
 
-                   m_v_horr=m_v*std::sin(angle_after);
-                   other->m_v_horr=-other->m_v*std::sin(other->angle_after);
-                  //--
+//                   m_v_horr=m_v*std::sin(angle_after);
+//                   other->m_v_horr=other->m_v*std::sin(other->angle_after);
+//                  //--
 
-              //  qDebug()<<"1v";
+//              //  qDebug()<<"1v";
 
-                 //разъединение объектов
-                 m_y-=m_y+m_height-intersection.y()-intersection.height()+0.5;
-                  if (this->center().x()<other->center().x()) {
-                       m_x-=m_x+m_width-intersection.x()-intersection.width()+0.5;
-                  } else {
-                      m_x+=other->m_x+other->m_width-intersection.x()-intersection.width()+0.5;
-                  }
+//                 //разъединение объектов
+//                 m_y-=m_y+m_height-intersection.y()-intersection.height()+0.5;
+//                  if (this->center().x()<other->center().x()) {
+//                       m_x-=m_x+m_width-intersection.x()-intersection.width()+0.5;
+//                  } else {
+//                      m_x+=other->m_x+other->m_width-intersection.x()-intersection.width()+0.5;
+//                  }
 
-        } else if (m_falling && other->m_falling){
-
-
-                  //расчет упругого отскока
-
-                  other->m_v=(other->m_mass*a+std::sqrt(std::pow(other->m_mass*a,2)+4*d*c))/(2*d);
-                  m_v=a-(other->m_mass/m_mass)*other->m_v;
-
-                  m_v_vert=m_v*std::cos(angle_after);
-                  other->m_v_vert=other->m_v*std::cos(other->angle_after);
+//        } else if (m_falling && other->m_falling){
 
 
-                  m_v_horr=m_v*std::sin(angle_after);
-                  other->m_v_horr=-other->m_v*std::sin(other->angle_after);
-                  //--
+//                  //расчет упругого отскока
 
-                  //qDebug()<<"2v";
+//                  other->m_v=(other->m_mass*a+std::sqrt(std::pow(other->m_mass*a,2)+4*d*c))/(2*d);
+//                  m_v=a-(other->m_mass/m_mass)*other->m_v;
 
-
-                  //разъединение объектов
-                  m_y-=m_y+m_height-intersection.y()-intersection.height()+0.5;
-                  if (this->center().x()<other->center().x()) {
-                    m_x-=m_x+m_width-intersection.x()-intersection.width()+0.5;
-                   } else {
-                     m_x+=other->m_x+other->m_width-intersection.x()-intersection.width()+0.5;
-                   }
-        }
-
-        else if (!m_falling && !other->m_falling){
+//                  m_v_vert=m_v*std::cos(angle_after);
+//                  other->m_v_vert=other->m_v*std::cos(other->angle_after);
 
 
-                 //расчет упругого отскока
+//                  m_v_horr=m_v*std::sin(angle_after);
+//                  other->m_v_horr=other->m_v*std::sin(other->angle_after);
+//                  //--
 
-                 other->m_v=(other->m_mass*a+std::sqrt(std::pow(other->m_mass*a,2)+4*d*c))/(2*d);
-                 m_v=a-(other->m_mass/m_mass)*other->m_v;
-
-                 m_v_vert=m_v*std::cos(angle_after);
-                 other->m_v_vert=other->m_v*std::cos(other->angle_after);
+//                  //qDebug()<<"2v";
 
 
-                 m_v_horr=m_v*std::sin(angle_after);
-                 other->m_v_horr=-other->m_v*std::sin(other->angle_after);
-                 //--
+//                  //разъединение объектов
+//                  m_y-=m_y+m_height-intersection.y()-intersection.height()+0.5;
+//                  if (this->center().x()<other->center().x()) {
+//                    m_x-=m_x+m_width-intersection.x()-intersection.width()+0.5;
+//                   } else {
+//                     m_x+=other->m_x+other->m_width-intersection.x()-intersection.width()+0.5;
+//                   }
+//        }
 
-                //qDebug()<<"3v";
+//        else if (!m_falling && !other->m_falling){
 
-                 //разъединение объектов
-                  m_y-=m_y+m_height-intersection.y()-intersection.height()+0.5;
-                  if (this->center().x()<other->center().x()) {
-                      m_x-=m_x+m_width-intersection.x()-intersection.width()+0.5;
-                  } else {
-                      m_x+=other->m_x+other->m_width-intersection.x()-intersection.width()+0.5;
-                  }
-        }
+
+//                 //расчет упругого отскока
+
+//                 other->m_v=(other->m_mass*a+std::sqrt(std::pow(other->m_mass*a,2)+4*d*c))/(2*d);
+//                 m_v=a-(other->m_mass/m_mass)*other->m_v;
+
+//                 m_v_vert=m_v*std::cos(angle_after);
+//                 other->m_v_vert=other->m_v*std::cos(other->angle_after);
+
+
+//                 m_v_horr=m_v*std::sin(angle_after);
+//                 other->m_v_horr=other->m_v*std::sin(other->angle_after);
+//                 //--
+
+//                //qDebug()<<"3v";
+
+//                 //разъединение объектов
+//                  m_y-=m_y+m_height-intersection.y()-intersection.height()+0.5;
+//                  if (this->center().x()<other->center().x()) {
+//                      m_x-=m_x+m_width-intersection.x()-intersection.width()+0.5;
+//                  } else {
+//                      m_x+=other->m_x+other->m_width-intersection.x()-intersection.width()+0.5;
+//                  }
+//        }
      //--
 
 
+            //расчет упругого отскока
+         if ((m_falling && !other->m_falling) || (m_falling && other->m_falling) || (!m_falling && !other->m_falling)) {
+            other->m_v=(other->m_mass*a+std::sqrt(std::pow(other->m_mass*a,2)+4*d*c))/(2*d);
+            m_v=a-(other->m_mass/m_mass)*other->m_v;
+
+            m_v_vert=m_v*std::cos(angle_after);
+            other->m_v_vert=other->m_v*std::cos(other->angle_after);
+
+
+            m_v_horr=m_v*std::sin(angle_after);
+            other->m_v_horr=other->m_v*std::sin(other->angle_after);
+            //--
+                //поворот
+            //    this->setTransformOriginPoint(center().x(),center().y());     //устанавливаем центр вращения
+            //    this->setRotation(30);
+             //qDebug()<<"0v";
+
+            //разъединение объектов
+             m_y-=m_y+m_height-intersection.y()-intersection.height()+0.5;
+             if (this->center().x()<other->center().x()) {
+                 m_x-=m_x+m_width-intersection.x()-intersection.width()+0.5;
+             } else {
+                 m_x+=other->m_x+other->m_width-intersection.x()-intersection.width()+0.5;
+             }
+
+           }
+           //
     }
     }
   //======

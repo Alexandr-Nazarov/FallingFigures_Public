@@ -38,7 +38,7 @@ QTimer *m_timer;
 qreal m_v{0};          //скорость
 qreal m_v_vert{0};     //вертикальная скорость
 qreal m_v_horr{0};     //горизонт-я скорость
-qreal angle_conc{0};   //угол касания
+//qreal angle_conc{0};   //угол касания
 qreal angle_after{0};  //угол разлета
 qreal m_mass{0};       //масса
 bool m_falling{true};  //признак падения
