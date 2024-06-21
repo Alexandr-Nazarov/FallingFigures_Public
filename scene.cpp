@@ -6,7 +6,7 @@ Scene::Scene(qreal width, qreal height, QWidget *parent) : QGraphicsScene(parent
     QGraphicsScene::setSceneRect(0,0,m_width,m_height);
 
     //границы сцены
-  //     create_frame_of_scene();
+ //      create_frame_of_scene();
 //        //т.к. фигуры двигаются с определенной частотой по таймеру, заданном в их конструкторе, то чтобы не было мелькания или пропадания фигур
 //        // сделал частоту обновления сцены:
     m_timer=new QTimer(this);
@@ -87,10 +87,11 @@ void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                  //---
            }
          //===
+
      }
 
         QGraphicsScene::mousePressEvent(event);
-
+  //m_timer->start(5);
 }
 
 void Scene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)

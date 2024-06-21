@@ -38,9 +38,11 @@ QTimer *m_timer;
 qreal m_v{0};          //скорость
 qreal m_v_vert{0};     //вертикальная скорость
 qreal m_v_horr{0};     //горизонт-я скорость
-//qreal angle_conc{0};   //угол касания
 qreal angle_after{0};  //угол разлета
 qreal m_mass{0};       //масса
+qreal m_angle_rotate{0};//угол вращения
+QTransform current_transform;
+QTransform rotation;
 bool m_falling{true};  //признак падения
 bool m_toright{false}; //признак движения вправо
 //bool m_checked_for_collides{false}; //признак для проверки при столкновении только единожды
@@ -52,7 +54,7 @@ qreal m_frame_left{0};
 qreal m_frame_height;
 qreal m_frame_width;
 //----
-qreal m_top_phy_point; //верхняя точка при отскоке
+//qreal m_top_phy_point; //верхняя точка при отскоке
 
 qreal m_moving{0};
 constants m_constants;
@@ -65,8 +67,8 @@ public:
 
     void SetRect(QRectF);
 
-    void Stop_moving()  {m_v=0; m_v_vert=0; m_v_horr=0; m_moving=0;}               //останавливаем движение
-    void Start_moving() {m_v=0; m_v_vert=0; m_v_horr=0; m_moving=1;}               //начальное движение-падение
+    void Stop_moving()  {m_v=0; m_v_vert=0; m_v_horr=0; m_angle_rotate =0; m_moving=0;}               //останавливаем движение
+    void Start_moving() {m_v=0; m_v_vert=0; m_v_horr=0; m_angle_rotate =1; m_moving=1;}               //начальное движение-падение
 
 
 

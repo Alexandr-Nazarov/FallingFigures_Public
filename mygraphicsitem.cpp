@@ -22,6 +22,10 @@ void MovingEllipse::SetRect(QRectF rect){
   //  m_timer->start((10000/(m_width*m_height))<3 ? 3: (10000/(m_width*m_height))>10 ? 10: 10000/(m_width*m_height));         //устанавливаю таймер для скорости движения фигуры от объема
   //  m_timer->start(5);
    // m_timer->setInterval(m_mass);
+
+  //  this->setTransformOriginPoint(this->boundingRect().center());     //устанавливаем центр вращения
+   //  this->setTransformOriginPoint(this->center().x(),this->center().y());     //устанавливаем центр вращения
+   // current_transform=this->transform();
 }
 
 
@@ -45,10 +49,23 @@ QPoint& MovingEllipse::center(){
 
 //Физика
 
-
 void MovingEllipse::physics(MovingEllipse* other){
 
   m_v=m_v_vert+m_v_horr;
+
+  //угол вращения
+//  this->setTransformOriginPoint(this->center().x(),this->center().y());     //устанавливаем центр вращения
+//  current_transform=this->transform();
+
+// //  m_angle_rotate*=2;
+
+//  rotation.rotate(m_angle_rotate);
+////  this->setRotation(m_angle_rotate);
+//  QTransform new_transform=current_transform*rotation;
+//    this->setTransform(new_transform);
+
+  //---
+
   //---вертикальное движение
     //общие законы
 
@@ -103,12 +120,12 @@ void MovingEllipse::physics(MovingEllipse* other){
     if (((m_y+m_height)>=(m_frame_bottom)) && m_falling ) {      //удар об нижнюю границу
         m_v_vert=-m_v_vert*m_constants.c_e;                     //при отскоке от земли масса не имеет значение, только коэфф.упругости
     }
-    }
-   // --- удар об верхнюю точку
-//    if (((m_y)<=m_frame_height) || ((m_y)<=m_top_phy_point)) {     //удар об потолок или верхнюю возможную точку
-//        m_dy*=-1;
-//    }
 
+   // --- удар об верхнюю точку
+//    else if (m_y<=m_frame_height  && !m_falling ) {     //удар об потолок или верхнюю возможную точку
+//         m_v_vert=-m_v_vert*m_constants.c_e;
+//    }
+   }
   //==== удар об другой объект
     if (other){
    if ((m_falling && !other->m_falling) || (m_falling && other->m_falling) || (!m_falling && !other->m_falling)) {
@@ -245,7 +262,7 @@ void MovingEllipse::physics(MovingEllipse* other){
      //--
 
 
-            //расчет упругого отскока
+            //расчет упругого столкновения
      //    if ((m_falling && !other->m_falling) || (m_falling && other->m_falling) || (!m_falling && !other->m_falling)) {
             other->m_v=(other->m_mass*a+std::sqrt(std::pow(other->m_mass*a,2)+4*d*c))/(2*d);
             m_v=a-(other->m_mass/m_mass)*other->m_v;
@@ -258,9 +275,10 @@ void MovingEllipse::physics(MovingEllipse* other){
             other->m_v_horr=other->m_v*std::sin(other->angle_after);
             //--
                 //поворот
-            //    this->setTransformOriginPoint(center().x(),center().y());     //устанавливаем центр вращения
-            //    this->setRotation(30);
-             //qDebug()<<"0v";
+                //  this->setTransformOriginPoint(center().x(),center().y());     //устанавливаем центр вращения
+                //  this->setRotation(m_angle_rotate);
+             //   m_angle_rotate+=1;;
+                //---
 
             //разъединение объектов
              m_y-=m_y+m_height-intersection.y()-intersection.height()+0.5;
