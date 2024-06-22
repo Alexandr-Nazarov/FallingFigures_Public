@@ -6,12 +6,11 @@ Scene::Scene(qreal width, qreal height, QWidget *parent) : QGraphicsScene(parent
     QGraphicsScene::setSceneRect(0,0,m_width,m_height);
 
     //границы сцены
-  //     create_frame_of_scene();
-//        //т.к. фигуры двигаются с определенной частотой по таймеру, заданном в их конструкторе, то чтобы не было мелькания или пропадания фигур
-//        // сделал частоту обновления сцены:
+
     m_timer=new QTimer(this);
-    QObject::connect(m_timer, SIGNAL(timeout()), this, SLOT(update()));
     m_timer->start(5);
+    QObject::connect(m_timer, SIGNAL(timeout()), this, SLOT(upd())); //т.к. из-за таймера проблемы с потоками при отображении рамки и обектов, то отправляю обработки в событие
+    create_frame_of_scene();
 
     //===
 
@@ -24,12 +23,25 @@ void Scene::create_frame_of_scene(){
     m_frame->setZValue(-1);     //устанавливаем на задний фон
     m_frame->setBrush(Qt::transparent);
   //  m_frame->setActive(false);
-
+ //   m_frame->setSelected(false);
+     m_frame->setFlag(QGraphicsItem::ItemIsSelectable,false);
 
     addItem(m_frame);
 
     //===
 
+}
+
+void Scene::upd(){
+      MyEvent* eve=new MyEvent();
+      QApplication::postEvent(this, eve);
+   // this->update();
+}
+
+void Scene::refresh(){
+
+     this->clear();
+     create_frame_of_scene();
 }
 
 
@@ -47,7 +59,9 @@ void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)
             m_current=new /*QGraphicsRectItem*/MovingEllipse (m_startPoint.x(),m_startPoint.y(),0.,0.,m_width,m_height);
           QObject::connect( static_cast<MovingEllipse*>(m_current), SIGNAL(position_to_check_collides(QAbstractGraphicsShapeItem*)),
                             this, SLOT(slot_to_check_collides(QAbstractGraphicsShapeItem*)));
-
+        //   m_current->setSelected(true);
+            m_current->setZValue(1);
+            m_current->setFlag(QGraphicsItem::ItemIsSelectable,true);
        //+     }
 
            //добавить потом классы-фигуры для разнообразия
@@ -68,21 +82,21 @@ void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
          //выбираем элемент для дальнейшей проверки на столкновения
 
-           selected_item_for_collides =qgraphicsitem_cast<QAbstractGraphicsShapeItem* >( itemAt(event->scenePos(), QTransform()));
+          selected_item_for_collides =qgraphicsitem_cast<QAbstractGraphicsShapeItem* >( itemAt(event->scenePos(), QTransform()));
+
            if (selected_item_for_collides!=m_frame && selected_item_for_collides){
            static_cast<MovingEllipse*>(selected_item_for_collides)->Stop_moving();
 
-                 //для корректировки координат вирт-рамки при перетаскивании
-             //  qDebug()<<static_cast<MovingEllipse*>(selected_item_for_collides)->m_y;
+                 //для корректировки координат при перетаскивании
                m_startPoint.setX(static_cast<MovingEllipse*>(selected_item_for_collides)->getX()-event->scenePos().x());
                m_startPoint.setY(static_cast<MovingEllipse*>(selected_item_for_collides)->getY()-event->scenePos().y());
                  //---
            }
          //===
+qDebug()<<selected_item_for_collides;
      }
 
         QGraphicsScene::mousePressEvent(event);
-
 }
 
 void Scene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
@@ -118,7 +132,7 @@ void Scene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
         static_cast<MovingEllipse*>(selected_item_for_collides)->set_m_XY(
                 event->scenePos().x()+m_startPoint.x(),
                 event->scenePos().y()+m_startPoint.y());
-        update();
+       //!!!! update();
          }
     //====
 
@@ -129,6 +143,7 @@ void Scene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
 void Scene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
+
     //начальное движение-падение
     if (m_drawingInProcess){
       m_drawingInProcess=false;
@@ -187,3 +202,11 @@ void Scene::slot_to_check_collides(QAbstractGraphicsShapeItem* item)   //про�
       }
 }
 
+
+bool Scene::event(QEvent *event){
+    if (event->type()==static_cast<QEvent::Type>(MyEv)) {
+        this->update();
+        return true;
+    }
+    return QGraphicsScene::event(event);
+}

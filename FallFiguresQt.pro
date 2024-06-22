@@ -1,6 +1,7 @@
 QT       += core gui
 
 
+
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11
@@ -19,11 +20,13 @@ DESTDIR= ./exe
 SOURCES += \
     main.cpp \
     fallingfigures.cpp \
+    myevent.cpp \
     mygraphicsitem.cpp \
     scene.cpp
 
 HEADERS += \
     fallingfigures.h \
+    myevent.h \
     mygraphicsitem.h \
     scene.h
 

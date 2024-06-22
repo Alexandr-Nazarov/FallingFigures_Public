@@ -16,7 +16,7 @@ FallingFigures::FallingFigures(QWidget *parent)
     ui->radioButton_Rect->pressed();
     ui->radioButton_Rect->setChecked(true);
 
-
+    QObject::connect(ui->clearButton , SIGNAL(clicked()), scene, SLOT(refresh()));
 
 }
 
@@ -34,7 +34,7 @@ void FallingFigures::paintEvent(QPaintEvent *event)
 
    ui->graphicsView->setGeometry(5,15,this->width()-100, this->height()-35);
 
-   ui->verticalLayoutWidget->setGeometry(ui->graphicsView->width()+15,15, this->width()-5, 50);
+   ui->verticalLayoutWidget->setGeometry(ui->graphicsView->width()+15,15, 80, 100);
 
 
 
