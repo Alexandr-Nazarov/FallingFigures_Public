@@ -41,6 +41,8 @@ QPointF m_startPoint;
 
 QTimer *m_timer;
 
+QPointF  select_point;
+
 
 public:
     explicit Scene(qreal, qreal, QWidget *parent = nullptr);
@@ -53,6 +55,8 @@ public:
 
 
 signals:
+
+void frame_height_width(qreal* ,qreal*);
 
 public slots:
 

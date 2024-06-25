@@ -1,15 +1,20 @@
 #include "mygraphicsitem.h"
 
 
-MovingEllipse::MovingEllipse(qreal x, qreal y ,qreal width, qreal height, qreal frame_width, qreal frame_height, QAbstractGraphicsShapeItem *parent )
-    :  QAbstractGraphicsShapeItem(parent), m_x(x), m_y(y), m_width(width), m_height(height), m_frame_height(frame_height),m_frame_width(frame_width)
+MovingEllipse::MovingEllipse(qreal x, qreal y ,qreal width, qreal height,/* qreal frame_width, qreal frame_height, */QAbstractGraphicsShapeItem *parent )
+    :  QAbstractGraphicsShapeItem(parent), m_x(x), m_y(y), m_width(width), m_height(height)/*, m_frame_height(frame_height),m_frame_width(frame_width)*/
 
 {
-
  m_timer=new QTimer(this);
  QObject::connect(m_timer, SIGNAL(timeout()), this, SLOT(animate()));
  m_timer->start(5);                //меньше не делать, а то не успевает обновляться
 
+}
+
+void MovingEllipse::set_m_frame_height_width(qreal* h,qreal *w){
+
+    m_frame_height=*h;
+    m_frame_width=*w;
 }
 
 
@@ -35,7 +40,7 @@ void MovingEllipse::SetRect(QRectF rect){
 //SLOTS
 void MovingEllipse::animate(){
 
-    MyEvent* eve=new MyEvent();
+    MyEvent* eve=new MyEvent(200);
     QApplication::postEvent(this, eve);
 
   //  physics();
@@ -49,7 +54,7 @@ QPoint& MovingEllipse::center(){
 }
 
 bool MovingEllipse::event(QEvent *event){
-    if (event->type()==static_cast<QEvent::Type>(MyEv)) {
+    if (event->type()==static_cast<QEvent::Type>(UpdateEv)) {
         physics();
         emit position_to_check_collides(static_cast<QAbstractGraphicsShapeItem*>(this));//посылаем сигнал, чтобы проверить текущее положение на столкновение
         return true;
@@ -156,12 +161,12 @@ void MovingEllipse::physics(MovingEllipse* other){
         //---
 
         //разъединение объектов
-          m_y-=m_y+m_height-intersection.y()-intersection.height()+0.5;
-         if (this->center().x()<other->center().x()) {
-              m_x-=m_x+m_width-intersection.x()-intersection.width()+0.5;
-         } else {
-             m_x+=other->m_x+other->m_width-intersection.x()-intersection.width()+0.5;
-         }
+//          m_y-=m_y+m_height-intersection.y()-intersection.height()+0.5;
+//         if (this->center().x()<other->center().x()) {
+//              m_x-=m_x+m_width-intersection.x()-intersection.width()+0.5;
+//         } else {
+//             m_x+=other->m_x+other->m_width-intersection.x()-intersection.width()+0.5;
+//         }
 
          //----
 
@@ -214,12 +219,12 @@ void MovingEllipse::physics(MovingEllipse* other){
                 //---
 
             //разъединение объектов
-//             m_y-=m_y+m_height-intersection.y()-intersection.height()+0.5;
-//             if (this->center().x()<other->center().x()) {
-//                 m_x-=m_x+m_width-intersection.x()-intersection.width()+0.5;
-//             } else {
-//                 m_x+=other->m_x+other->m_width-intersection.x()-intersection.width()+0.5;
-//             }
+             m_y-=m_y+m_height-intersection.y()-intersection.height()+0.5;
+             if (this->center().x()<other->center().x()) {
+                 m_x-=m_x+m_width-intersection.x()-intersection.width()+0.5;
+             } else {
+                 m_x+=other->m_x+other->m_width-intersection.x()-intersection.width()+0.5;
+             }
 
 
            //
