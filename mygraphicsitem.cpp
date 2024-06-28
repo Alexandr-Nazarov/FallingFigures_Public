@@ -161,11 +161,11 @@ void MovingEllipse::physics(MovingEllipse* other){
         //---
 
         //разъединение объектов
-        m_y+=(m_y/*+m_height*/-intersection.y()/*+0.5*/);
+        m_y+=(m_y/*+m_height*/-intersection.y()-0.5);
          if (this->center().x()<other->center().x()) {
-             m_x-=m_x+m_width-intersection.x()-intersection.width()+0.5;
-         } else {
-             m_x+=other->m_x+other->m_width-intersection.x()-intersection.width()+0.5;
+             m_x-=m_x+m_width-intersection.x()-intersection.width()/*+0.5*/;
+         } else if (this->center().x()>other->center().x()){
+             m_x+=other->m_x+other->m_width-intersection.x()-intersection.width()/*+0.5*/;
 
          }
 
@@ -181,15 +181,15 @@ void MovingEllipse::physics(MovingEllipse* other){
         //расчет угла столкновения (подумать над вариациями (1)-норм и (2)-норм для улучшения)
         qreal b_ocr=std::sqrt(std::pow(intersection.center().x()-center().x(),2)+std::pow(intersection.center().y()-center().y(),2));
         if (std::abs(intersection.center().y()-center().y())<=b_ocr && b_ocr!=0){
-        if (this->center().x()<=other->center().x()){
+        if (this->center().x()<other->center().x()){
 //             angle_conc=(std::asin((-center().y()+intersection.center().y())/ b_ocr)-M_PI/2); // (1)  //!! //угол касания //теорема синусов// в радианах все
-
-        } else {
+        angle_conc=-(std::asin((-center().y()+intersection.center().y())/b_ocr)+M_PI/2);
+        } else  if (this->center().x()>other->center().x()) {
           //добавить width    qreal b_ocr=std::sqrt(std::pow(intersection.x()-center().x(),2)+std::pow(intersection.y()+intersection.height()-center().y(),2));
           //   angle_conc=/*M_PI/2-*/std::asin((intersection.y()-center().y())/ b_ocr);/*+M_PI/2; *///!!
            //    angle_conc=/*M_PI/2-*/std::asin((-intersection.y()+center().y())/ b_ocr);      // (2)
             //   angle_conc=M_PI-(std::asin((-intersection.y()+center().y())/ b_ocr)-M_PI/2);
-           angle_conc=(-std::asin((center().y()-intersection.center().y())/b_ocr)+3*M_PI/2);             // (2)  //!!
+          angle_conc=-(std::asin((-center().y()+intersection.center().y())/b_ocr)+M_PI/2);             // (2)  //!!super
          }
         } else { angle_conc=0;}
 
