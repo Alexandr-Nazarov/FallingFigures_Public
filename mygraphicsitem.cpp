@@ -68,11 +68,13 @@ bool MovingEllipse::event(QEvent *event){
 void MovingEllipse::physics(MovingEllipse* other){
 
   m_v=m_v_vert+m_v_horr;
- // qDebug()<<m_v;
+
+  //if (m_v>2)
+  qDebug()<<m_v;
 
   //угол вращения
-//  this->setTransformOriginPoint(this->center().x(),this->center().y());     //устанавливаем центр вращения
-//  current_transform=this->transform();
+  this->setTransformOriginPoint(this->center().x(),this->center().y());     //устанавливаем центр вращения
+  current_transform=this->transform();
 
 // //  m_angle_rotate*=2;
 
@@ -95,9 +97,9 @@ void MovingEllipse::physics(MovingEllipse* other){
     else {
         m_falling=false;
     }
-    if (m_y/*+m_height*/<m_frame_bottom) m_y=m_frame_bottom/*+m_height*/;           ///0000
+    if (m_y<m_frame_bottom) m_y=m_frame_bottom;
 
-    //if (std::abs(m_v_vert)>=m_constants.c_g) m_moving=1; else m_moving=0;
+   // if (std::abs(m_v_vert)>=m_constants.c_g) m_moving=1; else m_moving=0;
 
     //===
 
@@ -161,15 +163,16 @@ void MovingEllipse::physics(MovingEllipse* other){
         //---
 
         //разъединение объектов
-        m_y+=(m_y/*+m_height*/-intersection.y()-0.5);
+        m_y+=(m_y-intersection.y()-0.49);                                    //если поставить 0.5 то будут проваливаться друг-в-друга. иожно и без значения
          if (this->center().x()<other->center().x()) {
-             m_x-=m_x+m_width-intersection.x()-intersection.width()/*+0.5*/;
-         } else if (this->center().x()>other->center().x()){
-             m_x+=other->m_x+other->m_width-intersection.x()-intersection.width()/*+0.5*/;
-
+//             qDebug()<<other->m_x-intersection.x()-0.5;
+//              m_x+=other->m_x-intersection.x()-0.5;
+             m_x+=-0.5;
+         } else if (this->center().x()>=other->center().x()){
+           //  qDebug()<<other->m_x+other->m_width-intersection.x()-intersection.width()+0.5;
+           //  m_x+=other->m_x+other->m_width-intersection.x()-intersection.width()+0.5;
+               m_x+=0.5;
          }
-
-
          //----
 
        //вспомогательный расчет
@@ -181,15 +184,12 @@ void MovingEllipse::physics(MovingEllipse* other){
         //расчет угла столкновения (подумать над вариациями (1)-норм и (2)-норм для улучшения)
         qreal b_ocr=std::sqrt(std::pow(intersection.center().x()-center().x(),2)+std::pow(intersection.center().y()-center().y(),2));
         if (std::abs(intersection.center().y()-center().y())<=b_ocr && b_ocr!=0){
-        if (this->center().x()<other->center().x()){
-//             angle_conc=(std::asin((-center().y()+intersection.center().y())/ b_ocr)-M_PI/2); // (1)  //!! //угол касания //теорема синусов// в радианах все
-        angle_conc=-(std::asin((-center().y()+intersection.center().y())/b_ocr)+M_PI/2);
+         //    angle_conc=-(std::asin((-center().y()+intersection.center().y())/b_ocr)+M_PI/2);
+
+         if (this->center().x()<other->center().x()){
+        angle_conc=(std::asin((-center().y()+intersection.center().y())/b_ocr)+M_PI/2);               //(1) //!!
         } else  if (this->center().x()>other->center().x()) {
-          //добавить width    qreal b_ocr=std::sqrt(std::pow(intersection.x()-center().x(),2)+std::pow(intersection.y()+intersection.height()-center().y(),2));
-          //   angle_conc=/*M_PI/2-*/std::asin((intersection.y()-center().y())/ b_ocr);/*+M_PI/2; *///!!
-           //    angle_conc=/*M_PI/2-*/std::asin((-intersection.y()+center().y())/ b_ocr);      // (2)
-            //   angle_conc=M_PI-(std::asin((-intersection.y()+center().y())/ b_ocr)-M_PI/2);
-          angle_conc=-(std::asin((-center().y()+intersection.center().y())/b_ocr)+M_PI/2);             // (2)  //!!super
+        angle_conc=-(std::asin((-center().y()+intersection.center().y())/b_ocr)+M_PI/2);             // (2)  //!!super
          }
         } else { angle_conc=0;}
 
@@ -208,12 +208,13 @@ void MovingEllipse::physics(MovingEllipse* other){
 
 
             m_v_horr=m_v*std::sin(angle_after);
-            if (this->center().x()<=other->center().x()){
-              other->m_v_horr=other->m_v*std::sin(other->angle_after);
-             }
-            else {
-                other->m_v_horr=-other->m_v*std::sin(other->angle_after);
-            }
+//            if (this->center().x()<other->center().x()){
+//              other->m_v_horr=other->m_v*std::sin(other->angle_after);
+//             }
+//            else if (this->center().x()>other->center().x()) {
+//                other->m_v_horr=-other->m_v*std::sin(other->angle_after);
+//            }
+            other->m_v_horr=-other->m_v*std::sin(other->angle_after);
             //--
                 //поворот
                 //  this->setTransformOriginPoint(center().x(),center().y());     //устанавливаем центр вращения
