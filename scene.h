@@ -7,15 +7,18 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QAbstractGraphicsShapeItem>
 #include <QGraphicsRectItem>
+#include <QGraphicsItem>
 
 #include <QGraphicsLineItem>
+#include <QEvent>
 
 #include "fallingfigures.h"
 #include "mygraphicsitem.h"
+#include "myevent.h"
 
 
 
-
+//class MyEvent;
 
 
 class Scene : public QGraphicsScene
@@ -38,6 +41,8 @@ QPointF m_startPoint;
 
 QTimer *m_timer;
 
+QPointF  select_point;
+
 
 public:
     explicit Scene(qreal, qreal, QWidget *parent = nullptr);
@@ -51,9 +56,12 @@ public:
 
 signals:
 
+void frame_height_width(qreal* ,qreal*);
+
 public slots:
 
 void refresh();
+void upd();
 
 void create_frame_of_scene();
 
@@ -70,6 +78,10 @@ virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
 // QGraphicsScene interface
 protected:
 virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
+
+// QObject interface
+public:
+bool event(QEvent *event);
 };
 
 #endif // SCENE_H

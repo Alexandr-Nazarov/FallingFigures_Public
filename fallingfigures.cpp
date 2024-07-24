@@ -11,7 +11,7 @@ FallingFigures::FallingFigures(QWidget *parent)
     ui->graphicsView->setScene(scene);
     ui->graphicsView->setRenderHint(QPainter::Antialiasing,true); //сглаживание
     //scene->create_frame_of_scene();
-
+    ui->graphicsView->scale(1,-1);
 
     ui->radioButton_Rect->pressed();
     ui->radioButton_Rect->setChecked(true);

@@ -12,6 +12,8 @@
 #include <cmath>    //для вычисления физики
 
 #include "scene.h"
+#include "myevent.h"
+
 
 
 struct constants{
@@ -25,6 +27,7 @@ class MovingEllipse : public QObject, public QAbstractGraphicsShapeItem        /
 {
     Q_OBJECT
 private:
+
 
 qreal m_x;
 qreal m_y;
@@ -63,7 +66,7 @@ ShapeType m_shape_type;
 
 
 public:
-    MovingEllipse(qreal, qreal,qreal, qreal, qreal, qreal, /*QGraphicsItem*/ QAbstractGraphicsShapeItem *parent=0);
+    MovingEllipse(qreal, qreal,qreal, qreal, /*qreal, qreal, *//*QGraphicsItem*/ QAbstractGraphicsShapeItem *parent=0);
 
     void SetRect(QRectF);
 
@@ -118,12 +121,18 @@ private slots:               //заменил на private
 
 public slots:
 
-
+void set_m_frame_height_width(qreal*, qreal*);
 
 signals:
 
 void position_to_check_collides(QAbstractGraphicsShapeItem*);
 
+
+
+
+// QObject interface
+public:
+bool event(QEvent *event);
 };
 
 
