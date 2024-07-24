@@ -44,8 +44,11 @@ qreal m_v_horr{0};     //горизонт-я скорость
 qreal angle_after{0};  //угол разлета
 qreal m_mass{0};       //масса
 qreal m_angle_rotate{0};//угол вращения
+qreal m_vspom_angle{0}; //вспомогательный угол для вращения
+qreal m_rasst{0};  //расстояние от центра до точки соприкосновения
+qreal m_delta_y{0}; //смещение при вращении m_y
 QTransform current_transform;
-QTransform rotation;
+QTransform m_rotation;
 bool m_falling{true};  //признак падения
 bool m_toright{false}; //признак движения вправо
 //bool m_checked_for_collides{false}; //признак для проверки при столкновении только единожды
@@ -71,7 +74,7 @@ public:
     void SetRect(QRectF);
 
     void Stop_moving()  {m_v=0; m_v_vert=0; m_v_horr=0; m_angle_rotate =0; m_moving=0;}               //останавливаем движение
-    void Start_moving() {m_v=0; m_v_vert=0; m_v_horr=0; m_angle_rotate =1; m_moving=1;}               //начальное движение-падение
+    void Start_moving() {m_v=0; m_v_vert=0; m_v_horr=0; m_angle_rotate =0; m_moving=1;}               //начальное движение-падение
 
 
 
@@ -84,7 +87,11 @@ public:
 
     QPoint& center();       //центр фигуры
 
+    void rotate(qreal v1, qreal v2,qreal& rasst);    //вращение    //v-нач и кон скор-ти   //rasst-расстояние от центра до точки соприкосновения
+
+
 protected:
+
 
 
   virtual ~MovingEllipse() override { delete m_timer;}            //ВАЖНО! в протектед
@@ -127,12 +134,11 @@ signals:
 
 void position_to_check_collides(QAbstractGraphicsShapeItem*);
 
-
-
+void addpoint(QPoint&);
 
 // QObject interface
 public:
-bool event(QEvent *event);
+bool event(QEvent *event) override;
 };
 
 

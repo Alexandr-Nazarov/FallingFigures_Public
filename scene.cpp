@@ -66,6 +66,9 @@ void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)
           QObject::connect( static_cast<MovingEllipse*>(m_current), SIGNAL(position_to_check_collides(QAbstractGraphicsShapeItem*)),
                             this, SLOT(slot_to_check_collides(QAbstractGraphicsShapeItem*)));
 
+            m_point=new QGraphicsEllipseItem(0,0,2,2);
+           QObject::connect(static_cast<MovingEllipse*>(m_current), SIGNAL(addpoint(QPoint&)),this,SLOT(addp(QPoint&)));
+           addItem(m_point);
         //   m_current->setSelected(true);
           //  m_current->setZValue(1);
             m_current->setFlag(QGraphicsItem::ItemIsSelectable,true);
@@ -125,12 +128,10 @@ void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                  //---
            }
          //===
-
          qDebug()<<selected_item_for_collides;
      }
 
         QGraphicsScene::mousePressEvent(event);
-
 }
 
 void Scene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
@@ -209,9 +210,9 @@ void Scene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 
 void Scene::slot_to_check_collides(QAbstractGraphicsShapeItem* item)   //проверка на столкновения при авто-движении
 {
-      if (/*!m_drawingInProcess &&*/ item && item!=m_frame){
+      if (/*!m_drawingInProcess &&*/ item && item!=m_frame ){
        for (auto x : this->items()){
-           if((x!=item) && (x!=m_frame) ) {                            //еще раз подумать и разобраться с рамкой(исчезновением фигур)          
+           if((x!=item) && (x!=m_frame) && (x!=m_point) ) {                            //еще раз подумать и разобраться с рамкой(исчезновением фигур)
 
                     //тут
                if (item->collidesWithItem(x,Qt::IntersectsItemShape)/* || x->collidesWithItem(item,Qt::IntersectsItemShape)*/) { /* && !static_cast<MovingEllipse*>(x)->isInside(static_cast<MovingEllipse*>(item))*/    //подумать, если заезжает фигура

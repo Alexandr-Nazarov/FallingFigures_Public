@@ -31,6 +31,8 @@ QAbstractGraphicsShapeItem *selected_item_for_collides{nullptr}; //элемен�
 
 QAbstractGraphicsShapeItem* m_frame{nullptr};
 
+QAbstractGraphicsShapeItem* m_point{nullptr};
+
 qreal m_width;
 qreal m_height;
 
@@ -50,7 +52,8 @@ public:
 ~Scene(){ delete m_current;
           delete selected_item_for_collides;
           delete m_frame;
-          delete m_timer; }
+          delete m_timer;
+        delete m_point;}
 
 
 
@@ -66,6 +69,8 @@ void upd();
 void create_frame_of_scene();
 
 void slot_to_check_collides(QAbstractGraphicsShapeItem*);   //проверка на столкновения при авто-движении
+
+void addp(QPoint& point){m_point->setX(point.x());m_point->setY(point.y()); }
 
 // QGraphicsScene interface
 protected:
