@@ -70,7 +70,7 @@ void MovingEllipse::rotate(qreal v1,qreal v2,qreal& rasst){
 
 
     //угол вращения
-    this->setTransformOriginPoint(this->center().x(),this->center().y());     //устанавливаем центр вращения
+  this->setTransformOriginPoint(this->center().x(),this->center().y());     //устанавливаем центр вращения
   //  current_transform=this->transform();
   //  m_angle_rotate=0.0001;
   //  m_rotation.translate(this->boundingRect().center().x(),this->boundingRect().center().y() /*this->center().x(), this->center().y()*/);       //сдвиг, чтобы совпадал с центрои
@@ -83,19 +83,103 @@ void MovingEllipse::rotate(qreal v1,qreal v2,qreal& rasst){
      qreal L=J*rasst;         //момент силы
      qreal I=m_mass*(std::pow(m_width/2,2)+std::pow(m_height/2,2))/4;            //момент инерции I=(1/4)*m(a^2+b^2)
 
-     if (L&&I){
-     m_vspom_angle+=(m_vspom_angle+L/I);
-     m_vspom_angle=std::fmod(m_vspom_angle,360.0);
+     if (L&&I){                                             //если столкновение
+   //!  m_vspom_angle+=(m_vspom_angle+L/I);
+   //!  m_vspom_angle=std::fmod(m_vspom_angle,360.0);
+
+
+     if(m_angle_rotate>=0) {                                                        // от 0 до 360!!!  переделать с учетом этого
+       // m_vspom_angle+=(m_vspom_angle-L/I);
+         m_vspom_angle+=(m_vspom_angle+L/I);
+          qDebug()<<"m";
+     } else if (m_angle_rotate<0){                                                  //может быть <0 по часовой
+         //m_vspom_angle-=(m_vspom_angle+L/I);
+         m_vspom_angle-=(m_vspom_angle-L/I);
+         qDebug()<<"h";
      }
+
+    m_vspom_angle=std::fmod(m_vspom_angle,360.0);
+   }
+
+
+
+
      m_angle_rotate+=m_vspom_angle;
      m_angle_rotate=std::fmod(m_angle_rotate,360.0);
+    // m_angle_rotate=std::abs(m_angle_rotate);
     // m_angle_rotate+=1;
 
 
   if(m_angle_rotate){
-    // QPoint oldPoint(m_x,m_y);
-    QPoint oldPoint(m_x/*+m_width/2*/,/*m_y*//*m_frame_bottom*/-std::abs(m_height/2*std::sin(qDegreesToRadians( m_angle_rotate))));
-    m_frame_bottom=oldPoint.y();
+  //   QPoint oldPoint(m_x+m_width/2,0);
+   // QPoint oldPoint(m_x/*+m_width/2*/,/*-std::abs*/std::sqrt(std::pow((m_height/2)*std::sin(qDegreesToRadians( m_angle_rotate)),2)+std::pow((m_width/2)*std::cos(qDegreesToRadians( m_angle_rotate)),2)));
+   //QPoint oldPoint(m_x,(m_height/2*std::sin(qDegreesToRadians( m_angle_rotate))-(m_width/2*std::cos(qDegreesToRadians( m_angle_rotate))))/2);
+  // if (m_height>=m_width){
+//   QPoint oldPoint(m_x,(std::sqrt(std::pow(m_height/2,2)+std::pow(m_width/2,2)))*std::sin(qDegreesToRadians( m_angle_rotate))/2);
+
+   qreal p_y=0;
+   qreal b=0;
+   if (m_height>=m_width){
+
+//   if (std::abs(m_angle_rotate)>=0 && std::abs(m_angle_rotate)<=90 )
+//   p_y=(m_height/2*std::sin(qDegreesToRadians( m_angle_rotate))+(m_width/2*std::sin(qDegreesToRadians( m_angle_rotate))))/2;
+//   else if (std::abs(m_angle_rotate)>90 && std::abs(m_angle_rotate)<=180 )
+//   p_y=(m_height/2*std::sin(qDegreesToRadians( m_angle_rotate))-(m_width/2*std::sin(qDegreesToRadians( m_angle_rotate))))/2;
+//   }
+
+  // qreal b=std::abs(std::sin(qDegreesToRadians(m_angle_rotate))*(m_y-m_x/*m_height/2*/));
+  // p_y=-std::abs(m_height/2-b);
+
+
+     //  if (std::abs(static_cast<int>(m_angle_rotate))%180<90){
+       if (std::abs(m_angle_rotate)<90 || std::abs(m_angle_rotate)>=270 ){
+     //  qreal b=m_height/2*(1-std::sin(qDegreesToRadians(90-std::abs(m_angle_rotate))))-m_width/2*(1-std::sin(qDegreesToRadians(90-std::abs(m_angle_rotate)))) ;
+       b=(m_height-m_width)/2*(1-std::sin(qDegreesToRadians(90-std::abs(m_angle_rotate)))) ;
+       p_y=-std::abs(b);}
+
+      //if (std::abs(static_cast<int>(m_angle_rotate))%180>=90){
+        else /*if (std::abs(m_angle_rotate)>=90 && std::abs(m_angle_rotate)<270 )*/{
+   //    qreal b=m_height/2*(1+std::sin(qDegreesToRadians(90-std::abs(m_angle_rotate))))-m_width/2*(1+std::sin(qDegreesToRadians(90-std::abs(m_angle_rotate)))) ;
+        b=(m_height-m_width)/2*(1+std::sin(qDegreesToRadians(90-std::abs(m_angle_rotate)))) ;
+       p_y=-std::abs(b);
+       }
+
+    //  qreal tmp_x=m_x;
+    //  QPoint op(m_x,m_y);
+//       QTransform transform;
+//       transform.translate(0,m_y*std::sin(qDegreesToRadians( m_angle_rotate)));
+//       transform.rotate(m_angle_rotate);
+//       this->setTransform(transform);
+//      // QPoint np=transform.map(op);
+
+
+}
+
+
+  // }
+
+   QPoint oldPoint(m_x+m_width/2,p_y);
+   m_frame_bottom=oldPoint.y();
+   QPoint newPoint=oldPoint;
+   emit addpoint(newPoint);
+  // }
+
+   //!!!   QPoint oldPoint(m_x,m_height/2*std::sin(qDegreesToRadians( m_angle_rotate)));
+   //!!!   m_frame_bottom=oldPoint.y()/2;
+
+   this->setRotation(m_angle_rotate);
+
+ //   QPoint newPoint=oldPoint;
+
+ //   emit addpoint(newPoint);
+
+//   QTransform transform;
+//    transform.translate(center().x(),center().y());
+//       transform.rotate(m_angle_rotate);
+//       oldPoint = transform.map(oldPoint);
+//       m_frame_bottom=oldPoint.y();
+ //      this->setTransform(transform);
+
 
     //  QPoint oldPoint(m_x,m_frame_bottom);
 
@@ -106,7 +190,6 @@ void MovingEllipse::rotate(qreal v1,qreal v2,qreal& rasst){
   // m_rotation.translate(this->boundingRect().center().x(),this->boundingRect().center().y() /*this->center().x(), this->center().y()*/);
  //  this->setTransformOriginPoint(this->transform().dx(),this->transform().dy());
   //       QTransform new_transform=this->transform();
-    this->setRotation(m_angle_rotate);
 
   //  new_transform.translate(m_x,0);
 
@@ -132,9 +215,9 @@ void MovingEllipse::rotate(qreal v1,qreal v2,qreal& rasst){
     //    QPoint newPoint=old_transform.map(oldPoint);
     // QTransform new_transform2=new_transform*this->transform();
 
-        QPoint newPoint=oldPoint;//new_transform.map(oldPoint);
-      //   QPointF newPoint=this->transform().rotate(m_angle_rotate).map(oldPoint);
-        emit addpoint(newPoint);
+//        QPoint newPoint=oldPoint;//new_transform.map(oldPoint);
+//      //   QPointF newPoint=this->transform().rotate(m_angle_rotate).map(oldPoint);
+//        emit addpoint(newPoint);
 
     //    m_delta_y=std::abs(-oldPoint.y()+std::abs(newPoint.y()));
     //    m_frame_bottom=-oldPoint.y();
@@ -154,7 +237,7 @@ void MovingEllipse::rotate(qreal v1,qreal v2,qreal& rasst){
    /// m_frame_bottom=-m_width;
       // m_delta_y=newPoint.y();
    //   qDebug()<<m_frame_bottom<<"p";//newPoint<<m_delta_y;
-    qDebug()/*<<oldPoint*/<<m_frame_bottom<<newPoint<<"o";
+  //  qDebug()/*<<oldPoint*/<<m_frame_bottom<<newPoint<<"p";
 
       //  qDebug()<<m_delta_y;
   //    if (m_angle_rotate>-180){

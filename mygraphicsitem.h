@@ -83,7 +83,11 @@ public:
     qreal getX() const  {return m_x;}
     qreal getY() const  {return m_y;}
 
-    void set_m_XY(qreal x, qreal y) { m_y=y; m_x=x; }
+    void set_m_XY(qreal x, qreal y) { m_y=y;
+                                     // m_y*=std::sin(qDegreesToRadians(m_angle_rotate));
+                                      m_x=x;
+                                   //   m_y*=std::sin(m_angle_rotate);
+                                    }
 
     QPoint& center();       //центр фигуры
 
