@@ -10,7 +10,7 @@ Scene::Scene(qreal width, qreal height, QWidget *parent) : QGraphicsScene(parent
     m_timer=new QTimer(this);
     m_timer->start(5);
     QObject::connect(m_timer, SIGNAL(timeout()), this, SLOT(upd())); //т.к. из-за таймера проблемы с потоками при отображении рамки и обектов, то отправляю обработки в событие
-  //  create_frame_of_scene();
+    create_frame_of_scene();
 
     //===
 

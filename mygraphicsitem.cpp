@@ -9,14 +9,21 @@ MovingEllipse::MovingEllipse(qreal x, qreal y ,qreal width, qreal height,/* qrea
  QObject::connect(m_timer, SIGNAL(timeout()), this, SLOT(animate()));
  m_timer->start(5);                //меньше не делать, а то не успевает обновляться
 
-
 }
 
 void MovingEllipse::set_m_frame_height_width(qreal* h,qreal *w){
 
     m_frame_height=*h;
     m_frame_width=*w;
+
+    abs_m_frame_height=m_frame_height;
+    abs_m_frame_width=m_frame_width;
 }
+
+void MovingEllipse::set_m_XY(qreal x, qreal y) { m_y=y;
+                                                 m_x=x;
+                                                 this->setTransformOriginPoint(center().x(),center().y());  // для перемещения при вращении
+                                               }
 
 
 void MovingEllipse::SetRect(QRectF rect){
@@ -91,11 +98,11 @@ void MovingEllipse::rotate(qreal v1,qreal v2,qreal& rasst){
      if(m_angle_rotate>=0) {                                                        // от 0 до 360!!!  переделать с учетом этого
        // m_vspom_angle+=(m_vspom_angle-L/I);
          m_vspom_angle+=(m_vspom_angle+L/I);
-          qDebug()<<"m";
+          qDebug()<<"l";
      } else if (m_angle_rotate<0){                                                  //может быть <0 по часовой
          //m_vspom_angle-=(m_vspom_angle+L/I);
          m_vspom_angle-=(m_vspom_angle-L/I);
-         qDebug()<<"h";
+         qDebug()<<"j";
      }
 
     m_vspom_angle=std::fmod(m_vspom_angle,360.0);
@@ -111,150 +118,64 @@ void MovingEllipse::rotate(qreal v1,qreal v2,qreal& rasst){
 
 
   if(m_angle_rotate){
-  //   QPoint oldPoint(m_x+m_width/2,0);
-   // QPoint oldPoint(m_x/*+m_width/2*/,/*-std::abs*/std::sqrt(std::pow((m_height/2)*std::sin(qDegreesToRadians( m_angle_rotate)),2)+std::pow((m_width/2)*std::cos(qDegreesToRadians( m_angle_rotate)),2)));
-   //QPoint oldPoint(m_x,(m_height/2*std::sin(qDegreesToRadians( m_angle_rotate))-(m_width/2*std::cos(qDegreesToRadians( m_angle_rotate))))/2);
-  // if (m_height>=m_width){
-//   QPoint oldPoint(m_x,(std::sqrt(std::pow(m_height/2,2)+std::pow(m_width/2,2)))*std::sin(qDegreesToRadians( m_angle_rotate))/2);
 
-   qreal p_y=0;
-   qreal b=0;
-   if (m_height>=m_width){
+   //==коррекция нижней и верхней границы вирт.рамки
+      {
+          qreal b=0;
+          if (m_height>=m_width){
+              if (std::abs(m_angle_rotate)<90 || std::abs(m_angle_rotate)>=270 ){
+                  b=(m_height-m_width)/2*(1-std::sin(qDegreesToRadians(90-std::abs(m_angle_rotate)))) ;
+              } else {
+                  b=(m_height-m_width+1)/2*(1+std::sin(qDegreesToRadians(90-std::abs(m_angle_rotate)))) ;
+              }
+              m_frame_bottom=-std::abs(b);
+          } else {
+              if (std::abs(m_angle_rotate)<90 || std::abs(m_angle_rotate)>=270 ){
+                  b=(m_width-m_height)/2*std::sin(qDegreesToRadians(std::abs(m_angle_rotate)));
+              } else {
+                  b=(m_width-m_height)/2*std::sin(-qDegreesToRadians(std::abs(m_angle_rotate)));
+              }
 
-//   if (std::abs(m_angle_rotate)>=0 && std::abs(m_angle_rotate)<=90 )
-//   p_y=(m_height/2*std::sin(qDegreesToRadians( m_angle_rotate))+(m_width/2*std::sin(qDegreesToRadians( m_angle_rotate))))/2;
-//   else if (std::abs(m_angle_rotate)>90 && std::abs(m_angle_rotate)<=180 )
-//   p_y=(m_height/2*std::sin(qDegreesToRadians( m_angle_rotate))-(m_width/2*std::sin(qDegreesToRadians( m_angle_rotate))))/2;
-//   }
-
-  // qreal b=std::abs(std::sin(qDegreesToRadians(m_angle_rotate))*(m_y-m_x/*m_height/2*/));
-  // p_y=-std::abs(m_height/2-b);
-
-
-     //  if (std::abs(static_cast<int>(m_angle_rotate))%180<90){
-       if (std::abs(m_angle_rotate)<90 || std::abs(m_angle_rotate)>=270 ){
-     //  qreal b=m_height/2*(1-std::sin(qDegreesToRadians(90-std::abs(m_angle_rotate))))-m_width/2*(1-std::sin(qDegreesToRadians(90-std::abs(m_angle_rotate)))) ;
-       b=(m_height-m_width)/2*(1-std::sin(qDegreesToRadians(90-std::abs(m_angle_rotate)))) ;
-       p_y=-std::abs(b);}
-
-      //if (std::abs(static_cast<int>(m_angle_rotate))%180>=90){
-        else /*if (std::abs(m_angle_rotate)>=90 && std::abs(m_angle_rotate)<270 )*/{
-   //    qreal b=m_height/2*(1+std::sin(qDegreesToRadians(90-std::abs(m_angle_rotate))))-m_width/2*(1+std::sin(qDegreesToRadians(90-std::abs(m_angle_rotate)))) ;
-        b=(m_height-m_width)/2*(1+std::sin(qDegreesToRadians(90-std::abs(m_angle_rotate)))) ;
-       p_y=-std::abs(b);
-       }
-
-    //  qreal tmp_x=m_x;
-    //  QPoint op(m_x,m_y);
-//       QTransform transform;
-//       transform.translate(0,m_y*std::sin(qDegreesToRadians( m_angle_rotate)));
-//       transform.rotate(m_angle_rotate);
-//       this->setTransform(transform);
-//      // QPoint np=transform.map(op);
+              m_frame_bottom=std::abs(b);
+          }
+          m_frame_height=abs_m_frame_height-m_frame_bottom;
 
 
-}
+          // QPoint Point_bottom(m_x+m_width/2,m_frame_bottom);
+          // emit addpoint(Point_bottom);
+      }
+  //=====
+  //==коррекция левой и правой границы вирт.рамки
+      {
+          qreal b=0;
+          if (m_height<=m_width){
+              if (std::abs(m_angle_rotate)<90 || std::abs(m_angle_rotate)>=270 ){
+                  b=(m_height-m_width)/2*(1-std::sin(qDegreesToRadians(90-std::abs(m_angle_rotate)))) ;
+              } else {
+                  b=(m_height-m_width+1)/2*(1+std::sin(qDegreesToRadians(90-std::abs(m_angle_rotate)))) ;
+              }
+              m_frame_left=-std::abs(b);
+          }else {
+              if (std::abs(m_angle_rotate)<90 || std::abs(m_angle_rotate)>=270 ){
+                  b=(m_width-m_height)/2*std::sin(qDegreesToRadians(std::abs(m_angle_rotate)));
+              } else {
+                  b=(m_width-m_height)/2*std::sin(-qDegreesToRadians(std::abs(m_angle_rotate)));
+              }
+
+              m_frame_left=std::abs(b);
+          }
+           m_frame_width=abs_m_frame_width-m_frame_left;
+
+          QPoint Point(m_frame_left,m_y+m_height/2);
+          emit addpoint(Point);
+      }
+  //=====
 
 
-  // }
-
-   QPoint oldPoint(m_x+m_width/2,p_y);
-   m_frame_bottom=oldPoint.y();
-   QPoint newPoint=oldPoint;
-   emit addpoint(newPoint);
-  // }
-
-   //!!!   QPoint oldPoint(m_x,m_height/2*std::sin(qDegreesToRadians( m_angle_rotate)));
-   //!!!   m_frame_bottom=oldPoint.y()/2;
 
    this->setRotation(m_angle_rotate);
 
- //   QPoint newPoint=oldPoint;
 
- //   emit addpoint(newPoint);
-
-//   QTransform transform;
-//    transform.translate(center().x(),center().y());
-//       transform.rotate(m_angle_rotate);
-//       oldPoint = transform.map(oldPoint);
-//       m_frame_bottom=oldPoint.y();
- //      this->setTransform(transform);
-
-
-    //  QPoint oldPoint(m_x,m_frame_bottom);
-
-    // QTransform old_transform=this->transform();
-  //+   QTransform new_transform=this->transform().rotate(-m_angle_rotate);
-
-  // this->setTransform(new_transform);
-  // m_rotation.translate(this->boundingRect().center().x(),this->boundingRect().center().y() /*this->center().x(), this->center().y()*/);
- //  this->setTransformOriginPoint(this->transform().dx(),this->transform().dy());
-  //       QTransform new_transform=this->transform();
-
-  //  new_transform.translate(m_x,0);
-
-
-    // this->setTransform(new_transform);
-  //  this->setTransform(new_transform);
-   //  this->resetTransform();
-
-    // qDebug()<<this->transform().rotate(m_angle_rotate)  ;
- //    QTransform new_transform=this->transform().rotate(m_angle_rotate);
-     //qDebug()<<new_transform;
-   //   QTransform new_transform=this->transform();
-    //  QPoint oldPoint(m_x,m_y);
-  //    QPointF oldPoint = this->mapToParent(QPointF(m_x, m_y));
-
-
-     //  qDebug()<<newPoint<<oldPoint;
-
-     // qDebug()<<m_angle_rotate<<oldPoint<<newPoint <<"a" ;
-    //  m_delta_y=std::abs(oldPoint.y()-newPoint.y())-m_width;
-
-    //  if (m_falling){
-    //    QPoint newPoint=old_transform.map(oldPoint);
-    // QTransform new_transform2=new_transform*this->transform();
-
-//        QPoint newPoint=oldPoint;//new_transform.map(oldPoint);
-//      //   QPointF newPoint=this->transform().rotate(m_angle_rotate).map(oldPoint);
-//        emit addpoint(newPoint);
-
-    //    m_delta_y=std::abs(-oldPoint.y()+std::abs(newPoint.y()));
-    //    m_frame_bottom=-oldPoint.y();
-    //    m_frame_bottom=newPoint.y()-toBott;
-      //  m_delta_y=oldPoint.y()-newPoint.y();
-        //m_delta_y=std::abs(newPoint.y());
-     //   m_frame_bottom=-m_delta_y+m_height;
-     //   m_frame_bottom=-std::abs(newPoint.y())+m_delta_y;
-       // m_frame_bottom=new_transform.map(m_frame_bottom);
-     //   QPoint nullp(0,0);
-      //  m_frame_bottom=new_transform.map(QPoint(m_x,0)).y()+m_delta_y;
-   //   }
-     // else {
-     //     m_frame_bottom=0;
-     // }
-
-   /// m_frame_bottom=-m_width;
-      // m_delta_y=newPoint.y();
-   //   qDebug()<<m_frame_bottom<<"p";//newPoint<<m_delta_y;
-  //  qDebug()/*<<oldPoint*/<<m_frame_bottom<<newPoint<<"p";
-
-      //  qDebug()<<m_delta_y;
-  //    if (m_angle_rotate>-180){
-     //     m_frame_bottom=-m_delta_y;
- //      } else {
-      // m_angle_rotate=0;
-      // m_vspom_angle=0;
-           //m_frame_bottom=m_delta_y;
-   //    }
-  //  this->setTransform(new_transform*this->transform());
-    // qDebug()<<m_y<<m_delta_y<<m_height;
-  //   m_delta_y+=newPoint.y()-m_y;
- //    qDebug()<<m_delta_y;
-   //  m_x=newPoint.x();
-   //  m_y=newPoint.y();
-    //---
-   //  qDebug()<<   m_angle_rotate;
     rasst=0;
   }
 }
@@ -272,16 +193,13 @@ void MovingEllipse::physics(MovingEllipse* other){
  // m_frame_bottom=0;
   }
 
-  //if (m_v>2)
-  //qDebug()<<m_v;
-
-
-
   //---вертикальное движение
     //общие законы
 
     m_y-=(m_v_vert+(m_constants.c_g)/2)*m_moving;                         //расчет s=v0*t+(a*t^2)/2
     m_v_vert=m_v_vert+m_constants.c_g;                                    //v=v0+a*t
+
+   // m_v_horr+=0.0005;//ВРЕМЕННО
 
     if (m_v_vert >0) {                             //вводим признак падения, чтобы при ударе об нижнюю границу первое условие выполнилось единожды
         m_falling=true;
@@ -342,9 +260,9 @@ void MovingEllipse::physics(MovingEllipse* other){
     }
 
    // --- удар об верхнюю точку
-//    else if (m_y<=m_frame_height  && !m_falling ) {     //удар об потолок или верхнюю возможную точку
-//         m_v_vert=-m_v_vert*m_constants.c_e;
-//    }
+    else if (m_y+m_height>=m_frame_height  && !m_falling ) {     //удар об потолок
+         m_v_vert=-m_v_vert*m_constants.c_e;
+    }
    }
   //==== удар об другой объект
     if (other){
@@ -438,4 +356,5 @@ void MovingEllipse::physics(MovingEllipse* other){
   //======
 
 }
+
 

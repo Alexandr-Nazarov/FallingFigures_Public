@@ -47,7 +47,7 @@ qreal m_angle_rotate{0};//угол вращения
 qreal m_vspom_angle{0}; //вспомогательный угол для вращения
 qreal m_rasst{0};  //расстояние от центра до точки соприкосновения
 qreal m_delta_y{0}; //смещение при вращении m_y
-QTransform current_transform;
+//QTransform current_transform;
 QTransform m_rotation;
 bool m_falling{true};  //признак падения
 bool m_toright{false}; //признак движения вправо
@@ -60,6 +60,11 @@ qreal m_frame_left{0};
 qreal m_frame_height;
 qreal m_frame_width;
 //----
+//вспомогатеьные для вращения
+qreal abs_m_frame_height;
+qreal abs_m_frame_width;
+//---
+
 //qreal m_top_phy_point; //верхняя точка при отскоке
 
 qreal m_moving{0};
@@ -73,8 +78,8 @@ public:
 
     void SetRect(QRectF);
 
-    void Stop_moving()  {m_v=0; m_v_vert=0; m_v_horr=0; m_angle_rotate =0; m_moving=0;}               //останавливаем движение
-    void Start_moving() {m_v=0; m_v_vert=0; m_v_horr=0; m_angle_rotate =0; m_moving=1;}               //начальное движение-падение
+    void Stop_moving()  {m_v=0; m_v_vert=0; m_v_horr=0; /*m_angle_rotate =0;*/ m_moving=0;}               //останавливаем движение
+    void Start_moving() {m_v=0; m_v_vert=0; m_v_horr=0; /*m_angle_rotate =0;*/ m_moving=1;}               //начальное движение-падение
 
 
 
@@ -83,11 +88,7 @@ public:
     qreal getX() const  {return m_x;}
     qreal getY() const  {return m_y;}
 
-    void set_m_XY(qreal x, qreal y) { m_y=y;
-                                     // m_y*=std::sin(qDegreesToRadians(m_angle_rotate));
-                                      m_x=x;
-                                   //   m_y*=std::sin(m_angle_rotate);
-                                    }
+    void set_m_XY(qreal x, qreal y);
 
     QPoint& center();       //центр фигуры
 
