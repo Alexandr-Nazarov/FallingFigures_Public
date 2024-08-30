@@ -41,10 +41,13 @@ QTimer *m_timer;
 qreal m_v{0};          //скорость
 qreal m_v_vert{0};     //вертикальная скорость
 qreal m_v_horr{0};     //горизонт-я скорость
-qreal angle_after{0};  //угол разлета
+qreal angle_after{0};  //угол разлета в радианах
 qreal m_mass{0};       //масса
-qreal m_angle_rotate{0};//угол вращения
-qreal m_vspom_angle{0}; //вспомогательный угол для вращения
+
+qreal m_angle_rotate{0};//угол вращения в градусах
+qreal m_vspom_angle{0}; //вспомогательный угол для вращения в градусах
+qreal m_stop_angle{0};  //вспомогательный угол при остановке вращения
+
 qreal m_rasst{0};  //расстояние от центра до точки соприкосновения
 qreal m_delta_y{0}; //смещение при вращении m_y
 //QTransform current_transform;
@@ -78,8 +81,8 @@ public:
 
     void SetRect(QRectF);
 
-    void Stop_moving()  {m_v=0; m_v_vert=0; m_v_horr=0; /*m_angle_rotate =0;*/ m_moving=0;}               //останавливаем движение
-    void Start_moving() {m_v=0; m_v_vert=0; m_v_horr=0; /*m_angle_rotate =0;*/ m_moving=1;}               //начальное движение-падение
+    void Stop_moving()  {m_v=0; m_v_vert=0; m_v_horr=0; /*m_angle_rotate =0;*/m_vspom_angle=0; m_moving=0;}               //останавливаем движение
+    void Start_moving() {m_v=0; m_v_vert=0; m_v_horr=0; /*m_angle_rotate =0;*/m_vspom_angle=0; m_moving=1;}               //начальное движение-падение
 
 
 
@@ -92,7 +95,7 @@ public:
 
     QPoint& center();       //центр фигуры
 
-    void rotate(qreal v1, qreal v2,qreal& rasst);    //вращение    //v-нач и кон скор-ти   //rasst-расстояние от центра до точки соприкосновения
+    void rotate(qreal v1, qreal v2,qreal rasst=0);    //вращение    //v-нач и кон скор-ти   //rasst-расстояние от центра до точки соприкосновения
 
 
 protected:
@@ -111,7 +114,7 @@ protected:
 
         QPainterPath path;
         path.addEllipse(boundingRect());              //если фигура будет элиипсом, то изменить   !!!
-     //   path.addRect(boundingRect());
+       // path.addRect(boundingRect());
         return path;
     }
 
@@ -119,6 +122,7 @@ protected:
 
        painter->setBrush(Qt::green);
        painter->drawEllipse(m_x,m_y,m_width,m_height);
+      // painter->drawRect(m_x,m_y,m_width,m_height);
 
        painter->setBrush(Qt::blue);
       // painter->drawRect(m_x,m_y,m_width,m_height);

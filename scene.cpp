@@ -68,7 +68,7 @@ void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
             m_point=new QGraphicsEllipseItem(0,0,2,2);
            QObject::connect(static_cast<MovingEllipse*>(m_current), SIGNAL(addpoint(QPoint&)),this,SLOT(addp(QPoint&)));
-           addItem(m_point);
+        //!   addItem(m_point);
         //   m_current->setSelected(true);
           //  m_current->setZValue(1);
             m_current->setFlag(QGraphicsItem::ItemIsSelectable,true);

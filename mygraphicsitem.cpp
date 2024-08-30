@@ -23,6 +23,8 @@ void MovingEllipse::set_m_frame_height_width(qreal* h,qreal *w){
 void MovingEllipse::set_m_XY(qreal x, qreal y) { m_y=y;
                                                  m_x=x;
                                                  this->setTransformOriginPoint(center().x(),center().y());  // для перемещения при вращении
+
+
                                                }
 
 
@@ -73,7 +75,7 @@ bool MovingEllipse::event(QEvent *event){
 
 //Физика
 
-void MovingEllipse::rotate(qreal v1,qreal v2,qreal& rasst){
+void MovingEllipse::rotate(qreal v1,qreal v2,qreal rasst){
 
 
     //угол вращения
@@ -95,27 +97,110 @@ void MovingEllipse::rotate(qreal v1,qreal v2,qreal& rasst){
    //!  m_vspom_angle=std::fmod(m_vspom_angle,360.0);
 
 
-     if(m_angle_rotate>=0) {                                                        // от 0 до 360!!!  переделать с учетом этого
-       // m_vspom_angle+=(m_vspom_angle-L/I);
-         m_vspom_angle+=(m_vspom_angle+L/I);
-          qDebug()<<"l";
-     } else if (m_angle_rotate<0){                                                  //может быть <0 по часовой
-         //m_vspom_angle-=(m_vspom_angle+L/I);
-         m_vspom_angle-=(m_vspom_angle-L/I);
-         qDebug()<<"j";
+//     if(m_angle_rotate>=0) {                                                        // от 0 до 360!!!  переделать с учетом этого
+//       // m_vspom_angle+=(m_vspom_angle-L/I);
+//         m_vspom_angle-=(m_vspom_angle-L/I);
+//          qDebug()<<"m";
+//     } else if (m_angle_rotate<0){                                                  //может быть <0 по часовой
+//         //m_vspom_angle-=(m_vspom_angle+L/I);
+//         m_vspom_angle-=(m_vspom_angle-L/I);
+//         qDebug()<<"a";
+//     }
+
+    m_vspom_angle-=(m_vspom_angle-L/I);                                              //затухание вращение
+    m_vspom_angle=std::fmod(m_vspom_angle,360.0);
+  //  qDebug()<< qRadiansToDegrees( m_vspom_angle);
      }
 
-    m_vspom_angle=std::fmod(m_vspom_angle,360.0);
+//    if (m_height>=m_width){
+//    if (std::abs(m_vspom_angle)!=90 || std::abs(m_vspom_angle)!=270) {
+//     if (std::abs(m_angle_rotate)<90  ) {
+//         m_angle_rotate-=m_vspom_angle;
+//         qDebug()<<"a";
+//     }
+//     if (std::abs(m_angle_rotate)>=90 ) {
+//         m_angle_rotate+=m_vspom_angle;
+//         qDebug()<<"b";
+//     }
+//    }
+//    }
+
+     //===вращение
+     if (m_angle_rotate>0) {
+         m_angle_rotate-= m_vspom_angle;
+      //   qDebug()<< m_angle_rotate;
+     } else
+         if (m_angle_rotate<=0 ) {
+             m_angle_rotate+=m_vspom_angle;
+         //    qDebug()<<"b";
+         }
+
+     //-при остановке вращения
+     if (( std::abs(/*qRadiansToDegrees*/( m_vspom_angle))>0 && std::abs(/*qRadiansToDegrees*/( m_vspom_angle))<1)) {
+         if (m_height>=m_width) {
+
+             if ((/*std::abs(std::fmod(m_angle_rotate,180))>0 &&*/ std::abs(std::fmod(m_angle_rotate,180))<90) ){
+          //       qDebug()<<"a";
+                 (m_angle_rotate>0) ? m_stop_angle-=m_constants.c_g/10 :  m_stop_angle+=m_constants.c_g/10;
+                 m_angle_rotate-=m_stop_angle;
+                 if (/*std::abs(std::fmod(m_angle_rotate,180))<=0 || */std::abs(std::fmod(m_angle_rotate,180))>=90) { m_angle_rotate>0 ? m_stop_angle+=m_constants.c_z: m_stop_angle-=m_constants.c_z;}
+
+             } else
+             {
+         //        qDebug()<<"b";
+                 (m_angle_rotate>0) ? m_stop_angle+=m_constants.c_g/10 :  m_stop_angle-=m_constants.c_g/10;
+                 m_angle_rotate-=m_stop_angle;
+                 if (/*std::abs(std::fmod(m_angle_rotate,180))>0 &&*/ std::abs(std::fmod(m_angle_rotate,180))<90) {m_angle_rotate>0 ? m_stop_angle-=m_constants.c_z: m_stop_angle+=m_constants.c_z;}
+             }
+
+
+         } else /* m_height<m_width */{
+             if (std::abs(m_angle_rotate)>90)
+                 {
+                     if (std::abs(m_angle_rotate)>180 ) {
+                  //       qDebug()<<"c";
+                         (m_angle_rotate>0) ? m_stop_angle+=m_constants.c_g/10 :  m_stop_angle-=m_constants.c_g/10;
+                         m_angle_rotate-=m_stop_angle;
+                         if (std::abs(m_angle_rotate)<=180) {m_angle_rotate>0 ? m_stop_angle-=m_constants.c_z: m_stop_angle+=m_constants.c_z;}
+                     } else
+                     {
+                   //      qDebug()<<"d";
+                         (m_angle_rotate>0) ? m_stop_angle-=m_constants.c_g/10 :  m_stop_angle+=m_constants.c_g/10;
+                         m_angle_rotate-=m_stop_angle;
+                         if (std::abs(m_angle_rotate)>180 ) {m_angle_rotate>0 ? m_stop_angle+=m_constants.c_z: m_stop_angle-=m_constants.c_z;}
+                     }
+
+                 }
+             else if (std::abs(m_angle_rotate)<=90)
+
+                 {
+                     if (m_angle_rotate>0 ) {
+                  //       qDebug()<<"e";
+                         m_stop_angle+=m_constants.c_g/10;
+                         m_angle_rotate-=m_stop_angle;
+                         if ((m_angle_rotate)<=0) {m_stop_angle-=m_constants.c_z;}
+                     } else
+                     {
+                  //       qDebug()<<"f";
+                         m_stop_angle-=m_constants.c_g/10;
+                         m_angle_rotate-=m_stop_angle;
+                         if ((m_angle_rotate)>0 ) {m_stop_angle+=m_constants.c_z;}
+                     }
+
+                 }
+
+
+             }
+
    }
+     //---
 
 
-
-
-     m_angle_rotate+=m_vspom_angle;
+     //m_angle_rotate+=m_vspom_angle;
      m_angle_rotate=std::fmod(m_angle_rotate,360.0);
     // m_angle_rotate=std::abs(m_angle_rotate);
     // m_angle_rotate+=1;
-
+   //=====
 
   if(m_angle_rotate){
 
@@ -166,8 +251,8 @@ void MovingEllipse::rotate(qreal v1,qreal v2,qreal& rasst){
           }
            m_frame_width=abs_m_frame_width-m_frame_left;
 
-          QPoint Point(m_frame_left,m_y+m_height/2);
-          emit addpoint(Point);
+        //  QPoint Point(m_frame_left,m_y+m_height/2);
+       //!!   emit addpoint(Point);
       }
   //=====
 
@@ -185,11 +270,13 @@ void MovingEllipse::rotate(qreal v1,qreal v2,qreal& rasst){
 void MovingEllipse::physics(MovingEllipse* other){
 
 //  if (std::abs(m_v_vert)>m_constants.c_g) m_moving=1; else m_moving=0;
+     this->setTransformOriginPoint(center().x(),center().y());
+
 
   if  (m_moving){
   qreal v1=m_v;
   m_v=m_v_vert+m_v_horr;
-  rotate(v1,m_v,m_rasst);
+  rotate(v1,m_v/*,m_rasst*/);
  // m_frame_bottom=0;
   }
 
@@ -231,15 +318,37 @@ void MovingEllipse::physics(MovingEllipse* other){
           if (!other){
           if (((m_x+m_width)>=(m_frame_width)) && m_toright ) {      //удар об правую границу
               m_v_horr=-m_v_horr*m_constants.c_e;
-          }
+
+              m_rasst=m_frame_width-center().x();
+              qreal v1=m_v;
+              m_v=m_v_vert+m_v_horr;
+              rotate(v1,m_v,m_rasst);
+          } else
           if ((m_x<=m_frame_left) && !m_toright ) {                  //удар об левую границу
               m_v_horr=-m_v_horr*m_constants.c_e;
+
+              m_rasst=center().x()-m_frame_left;
+              qreal v1=m_v;
+              m_v=m_v_vert+m_v_horr;
+              rotate(v1,m_v,m_rasst);
           }
           if ((m_y)<=(m_frame_bottom) && m_falling){                     //торможение при касании нижней границы
               m_v_horr=m_v_horr*m_constants.c_e;
-          }
+              m_v_vert=-m_v_vert*m_constants.c_e;                     //при отскоке от земли масса не имеет значение, только коэфф.упругости
+
+              m_rasst=center().y()-m_frame_bottom;
+              qreal v1=m_v;
+              m_v=m_v_vert+m_v_horr;
+              rotate(v1,m_v,m_rasst);
+          } else
           if ((m_y+m_height)>=(m_frame_height) && !m_falling){                     //торможение при касании нижней границы
               m_v_horr=m_v_horr*m_constants.c_e;
+              m_v_vert=-m_v_vert*m_constants.c_e;
+
+              m_rasst=m_frame_height-center().y();
+              qreal v1=m_v;
+              m_v=m_v_vert+m_v_horr;
+              rotate(v1,m_v,m_rasst);
           }
 
           }
@@ -247,25 +356,35 @@ void MovingEllipse::physics(MovingEllipse* other){
 
 
     //--просто движение без сталкивания с другим объектом
-    if (!other){
-    if (((m_y)<=(m_frame_bottom)) && m_falling ) {      //удар об нижнюю границу
-        qreal v1=m_v_vert;
-        m_v_vert=-m_v_vert*m_constants.c_e;                     //при отскоке от земли масса не имеет значение, только коэфф.упругости
+//    if (!other){
+//    if (((m_y)<=(m_frame_bottom)) && m_falling ) {      //удар об нижнюю границу
+//     //   qreal v1=m_v_vert;
+//        m_v_vert=-m_v_vert*m_constants.c_e;                     //при отскоке от земли масса не имеет значение, только коэфф.упругости
 
-        m_rasst=center().y();                                                                                       //ЗДЕСЬ ПЕРЕДЕЛАТЬ!!!!
-      //  m_rasst=std::sqrt(std::pow(intersection.center().x()-center().x(),2)+std::pow(center().y(),2));
-        rotate(v1,m_v_vert,m_rasst);
-   //     m_frame_bottom=0;
-     //   qDebug()<<v1*m_constants.c_e<<m_v_vert;
-    }
+//        m_rasst=center().y()-m_frame_bottom;
+//        qreal v1=m_v;
+//        m_v=m_v_vert+m_v_horr;
+//        rotate(v1,m_v,m_rasst);
 
-   // --- удар об верхнюю точку
-    else if (m_y+m_height>=m_frame_height  && !m_falling ) {     //удар об потолок
-         m_v_vert=-m_v_vert*m_constants.c_e;
-    }
-   }
+//      //  rotate(v1,m_v_vert,m_rasst);
+//   //     m_frame_bottom=0;
+//     //   qDebug()<<v1*m_constants.c_e<<m_v_vert;
+//    }
+
+//   // --- удар об верхнюю точку
+//    else if (m_y+m_height>=m_frame_height  && !m_falling ) {     //удар об потолок
+//      //   qreal v1=m_v_vert;
+//         m_v_vert=-m_v_vert*m_constants.c_e;
+//     //    m_rasst=m_frame_height-center().y();
+//      //   rotate(v1,m_v_vert,m_rasst);
+//    }
+//   }
   //==== удар об другой объект
     if (other){
+           other->setTransformOriginPoint(other->center().x(),other->center().y());
+           this->setTransformOriginPoint(this->center().x(),this->center().y());
+
+
    if ((m_falling && !other->m_falling) || (m_falling && other->m_falling) || (!m_falling && !other->m_falling)) {
 
         if ((this->center().y()>=other->center().y())){  //рассматриваем только для верхнего объекта относительно 3 случаев столкновения (вн-вв, вн-вн, вв-вв)
@@ -304,15 +423,15 @@ void MovingEllipse::physics(MovingEllipse* other){
          //    angle_conc=-(std::asin((-center().y()+intersection.center().y())/b_ocr)+M_PI/2);
 
          if (this->center().x()<other->center().x()){
-        angle_conc=(std::asin((-center().y()+intersection.center().y())/b_ocr)+M_PI/2);               //(1) //!!
+        angle_conc=(std::asin((-center().y()+intersection.center().y())/b_ocr)+M_PI/2)/*+qDegreesToRadians(m_angle_rotate)*/;               //(1) //!!
         } else  if (this->center().x()>other->center().x()) {
-        angle_conc=-(std::asin((-center().y()+intersection.center().y())/b_ocr)+M_PI/2);             // (2)  //!!super
+        angle_conc=-(std::asin((-center().y()+intersection.center().y())/b_ocr)+M_PI/2)/*+qDegreesToRadians(m_angle_rotate)*/;             // (2)  //!!
          }
         } else { angle_conc=0;}
 
         //---
         //угол разлета
-        other->angle_after=std::atan(-(m_mass*std::sin(angle_conc))/(other->m_mass-m_mass*std::cos(angle_conc)));
+        other->angle_after=std::atan(-(m_mass*std::sin(angle_conc))/(other->m_mass-m_mass*std::cos(angle_conc)))/*+qDegreesToRadians(other->m_angle_rotate)*/ ;
         angle_after=(angle_conc-other->angle_after);
        //
 
@@ -350,6 +469,21 @@ void MovingEllipse::physics(MovingEllipse* other){
 
 
            //
+
+   m_rasst=std::sqrt(std::pow(center().y()-intersection.center().y(),2)+std::pow(center().x()-intersection.center().x(),2));
+   other->m_rasst=-std::sqrt(std::pow(other->center().y()-intersection.center().y(),2)+std::pow(other->center().x()-intersection.center().x(),2));
+   if (this->center().x()<other->center().x()){
+       m_rasst=-m_rasst;
+       other->m_rasst=-other->m_rasst;
+   }
+   qreal v1=m_v;
+   m_v=m_v_vert+m_v_horr;
+   rotate(v1,m_v,m_rasst);
+
+   qreal other_v1=other->m_v;
+   other->m_v=other->m_v_vert+other->m_v_horr;
+   rotate(other_v1,other->m_v,other->m_rasst);
+
     }
     }
     }
