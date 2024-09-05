@@ -125,15 +125,20 @@ void MovingEllipse::rotate(qreal v1,qreal v2,qreal rasst){
 //    }
 //    }
 
-     //===вращение
-     if (m_angle_rotate>0) {
-         m_angle_rotate-= m_vspom_angle;
-      //   qDebug()<< m_angle_rotate;
-     } else
-         if (m_angle_rotate<=0 ) {
-             m_angle_rotate+=m_vspom_angle;
-         //    qDebug()<<"b";
-         }
+     //===вращение                                  //&&&---!!!!!
+//     if (m_angle_rotate>0) {
+//         m_angle_rotate-= m_vspom_angle;
+//  //       qDebug()<< "a"<<m_vspom_angle;
+//     } else
+//         if (m_angle_rotate<=0 )
+//         {
+//             m_angle_rotate+=m_vspom_angle;
+//  //           qDebug()<<"b"<<m_vspom_angle;
+//         }
+
+ m_angle_rotate+=m_vspom_angle;
+
+    //---
 
      //-при остановке вращения
      if (( std::abs(/*qRadiansToDegrees*/( m_vspom_angle))>0 && std::abs(/*qRadiansToDegrees*/( m_vspom_angle))<1)) {
@@ -261,8 +266,11 @@ void MovingEllipse::rotate(qreal v1,qreal v2,qreal rasst){
    this->setRotation(m_angle_rotate);
 
 
-    rasst=0;
+  //  rasst=0;
+
   }
+
+
 }
 
 
@@ -387,8 +395,16 @@ void MovingEllipse::physics(MovingEllipse* other){
 
    if ((m_falling && !other->m_falling) || (m_falling && other->m_falling) || (!m_falling && !other->m_falling)) {
 
-        if ((this->center().y()>=other->center().y())){  //рассматриваем только для верхнего объекта относительно 3 случаев столкновения (вн-вв, вн-вн, вв-вв)
+       //-расчте матрицы поворота
+       qreal tmp_x=std::cos(qDegreesToRadians(m_angle_rotate))-std::sin(qDegreesToRadians(m_angle_rotate));
+       qreal tmp_y=std::sin(qDegreesToRadians(m_angle_rotate))+std::cos(qDegreesToRadians(m_angle_rotate));
 
+ //      qreal oth_tmp_x=std::cos(qDegreesToRadians(other->m_angle_rotate))-std::sin(qDegreesToRadians(other->m_angle_rotate));
+ //      qreal oth_tmp_y=std::sin(qDegreesToRadians(other->m_angle_rotate))+std::cos(qDegreesToRadians(other->m_angle_rotate));
+       //-
+
+        if (this->center().y()/**tmp_y*/>=other->center().y()/**oth_tmp_y*/){  //рассматриваем только для верхнего объекта относительно 3 случаев столкновения (вн-вв, вн-вн, вв-вв)
+     //  qDebug()<<"conc"<<this->center().y();
        //--точка пересечения
         QRectF coord_Rect_1=this->mapRectToScene(this->boundingRect());         //получаем координаты ограничивающих прям-к
         QRectF coord_Rect_2=other->mapRectToScene(other->boundingRect());       //получаем координаты ограничивающих прям-к
@@ -399,15 +415,25 @@ void MovingEllipse::physics(MovingEllipse* other){
         //---
 
         //разъединение объектов
-        m_y+=(m_y-intersection.y()-0.49);                                    //если поставить 0.5 то будут проваливаться друг-в-друга. иожно и без значения
-         if (this->center().x()<other->center().x()) {
-//             qDebug()<<other->m_x-intersection.x()-0.5;
-//              m_x+=other->m_x-intersection.x()-0.5;
-             m_x+=-0.5;
+     //   m_y+=std::abs((m_y*oth_tmp_y-intersection.y()*oth_tmp_y/*-0.49*/)*tmp_y)/*std::sin(1+qDegreesToRadians(90-std::abs(std::fmod(m_angle_rotate,180))))*/;    //если поставить 0.5 то будут проваливаться друг-в-друга. иожно и без значения
+          m_y+=std::abs(1*tmp_y);
+        // m_y+=std::abs((m_y-intersection.y()/*-0.49*/))*std::sin(1+qDegreesToRadians(90-std::abs(std::fmod(m_angle_rotate,180))));
+        if (this->center().x()<other->center().x()) {
+        //  qDebug()<<other->m_x-intersection.x()-0.5;
+        //  m_x+=other->m_x-intersection.x()-0.5;
+   //          m_x+=-0.5*std::sin(1+qDegreesToRadians(90-/*std::abs*/(std::fmod(m_angle_rotate,180))));
+            // m_x=/*std::abs*/(0.5*(oth_tmp_x));
+          //    m_x+=/*std::abs*/(-0.5/**tmp_x*/);
+      //       m_x-=std::abs((m_x-intersection.x()/*-0.49*/)/**tmp_x*/);
+            // m_v_horr=-m_v_horr;
+            m_x-=std::abs(1*tmp_x);
+
          } else if (this->center().x()>=other->center().x()){
            //  qDebug()<<other->m_x+other->m_width-intersection.x()-intersection.width()+0.5;
            //  m_x+=other->m_x+other->m_width-intersection.x()-intersection.width()+0.5;
-               m_x+=0.5;
+           //    m_x+=0.5*std::sin(1+qDegreesToRadians(90-/*std::abs*/(std::fmod(m_angle_rotate,180))));  //отл до разворота на 180
+           //   m_x+=0.5*std::sin(1+qDegreesToRadians(90-std::abs(std::fmod(m_angle_rotate,90))));
+             m_x+=std::abs(1*tmp_x);
          }
          //----
 
@@ -444,13 +470,20 @@ void MovingEllipse::physics(MovingEllipse* other){
 
 
             m_v_horr=m_v*std::sin(angle_after);
-//            if (this->center().x()<other->center().x()){
+            other->m_v_horr=-other->m_v*std::sin(other->angle_after);
+
+
+            if (this->center().x()<other->center().x()){      //  [][]
+            m_v_horr=-std::abs(m_v_horr);
+            other->m_v_horr=std::abs(other->m_v_horr);
+                        } else {m_v_horr=std::abs(m_v_horr);
+            other->m_v_horr=-std::abs(other->m_v_horr);}
 //              other->m_v_horr=other->m_v*std::sin(other->angle_after);
 //             }
 //            else if (this->center().x()>other->center().x()) {
 //                other->m_v_horr=-other->m_v*std::sin(other->angle_after);
 //            }
-            other->m_v_horr=-other->m_v*std::sin(other->angle_after);
+        //    other->m_v_horr=-other->m_v*std::sin(other->angle_after);
             //--
                 //поворот
                 //  this->setTransformOriginPoint(center().x(),center().y());     //устанавливаем центр вращения
@@ -470,25 +503,28 @@ void MovingEllipse::physics(MovingEllipse* other){
 
            //
 
-   m_rasst=std::sqrt(std::pow(center().y()-intersection.center().y(),2)+std::pow(center().x()-intersection.center().x(),2));
-   other->m_rasst=-std::sqrt(std::pow(other->center().y()-intersection.center().y(),2)+std::pow(other->center().x()-intersection.center().x(),2));
+    m_rasst=std::sqrt(std::pow(center().y()-intersection.center().y(),2)+std::pow(center().x()-intersection.center().x(),2));
+    other->m_rasst=-std::sqrt(std::pow(other->center().y()-intersection.center().y(),2)+std::pow(other->center().x()-intersection.center().x(),2));
+  //  m_rasst=std::sqrt(std::pow(center().y()-intersection.center().y(),2)+std::pow(center().x()-intersection.center().x(),2));
+
    if (this->center().x()<other->center().x()){
        m_rasst=-m_rasst;
        other->m_rasst=-other->m_rasst;
    }
+
    qreal v1=m_v;
    m_v=m_v_vert+m_v_horr;
-   rotate(v1,m_v,m_rasst);
+   rotate(v1,m_v*10,m_rasst);
 
    qreal other_v1=other->m_v;
    other->m_v=other->m_v_vert+other->m_v_horr;
-   rotate(other_v1,other->m_v,other->m_rasst);
+   other->rotate(other_v1,other->m_v*10,other->m_rasst);
 
     }
     }
     }
   //======
-
+ // qDebug()<<m_rasst;
 }
 
 
