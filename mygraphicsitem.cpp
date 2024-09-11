@@ -1,7 +1,7 @@
 #include "mygraphicsitem.h"
 
 
-MovingEllipse::MovingEllipse(qreal x, qreal y ,qreal width, qreal height,/* qreal frame_width, qreal frame_height, */QAbstractGraphicsShapeItem *parent )
+MovingFigure::MovingFigure(qreal x, qreal y ,qreal width, qreal height,/* qreal frame_width, qreal frame_height, */QAbstractGraphicsShapeItem *parent )
     :  QAbstractGraphicsShapeItem(parent), m_x(x), m_y(y), m_width(width), m_height(height)/*, m_frame_height(frame_height),m_frame_width(frame_width)*/
 
 {
@@ -11,7 +11,7 @@ MovingEllipse::MovingEllipse(qreal x, qreal y ,qreal width, qreal height,/* qrea
 
 }
 
-void MovingEllipse::set_m_frame_height_width(qreal* h,qreal *w){
+void MovingFigure::set_m_frame_height_width(qreal* h,qreal *w){
 
     m_frame_height=*h;
     m_frame_width=*w;
@@ -20,7 +20,7 @@ void MovingEllipse::set_m_frame_height_width(qreal* h,qreal *w){
     abs_m_frame_width=m_frame_width;
 }
 
-void MovingEllipse::set_m_XY(qreal x, qreal y) { m_y=y;
+void MovingFigure::set_m_XY(qreal x, qreal y) { m_y=y;
                                                  m_x=x;
                                                  this->setTransformOriginPoint(center().x(),center().y());  // для перемещения при вращении
 
@@ -28,7 +28,7 @@ void MovingEllipse::set_m_XY(qreal x, qreal y) { m_y=y;
                                                }
 
 
-void MovingEllipse::SetRect(QRectF rect){
+void MovingFigure::SetRect(QRectF rect){
 
     m_x=rect.x();
     m_y=rect.y();
@@ -48,7 +48,7 @@ void MovingEllipse::SetRect(QRectF rect){
 
 
 //SLOTS
-void MovingEllipse::animate(){
+void MovingFigure::animate(){
 
     MyEvent* eve=new MyEvent(200);
     QApplication::postEvent(this, eve);
@@ -57,25 +57,25 @@ void MovingEllipse::animate(){
   //  emit position_to_check_collides(static_cast<QAbstractGraphicsShapeItem*>(this));//посылаем сигнал, чтобы проверить текущее положение на столкновение
 }
 
-QPoint& MovingEllipse::center(){
+QPoint& MovingFigure::center(){
     m_center.setX(m_x+m_width/2);
     m_center.setY(m_y+m_height/2);
     return m_center;
 }
 
-bool MovingEllipse::event(QEvent *event){
+bool MovingFigure::event(QEvent *event){
     if (event->type()==static_cast<QEvent::Type>(UpdateEv)) {
         physics();
         emit position_to_check_collides(static_cast<QAbstractGraphicsShapeItem*>(this));//посылаем сигнал, чтобы проверить текущее положение на столкновение
         return true;
     }
-    //return MovingEllipse::event(event);
+    //return MovingFigure::event(event);
 }
 
 
 //Физика
 
-void MovingEllipse::rotate(qreal v1,qreal v2,qreal rasst){
+void MovingFigure::rotate(qreal v1,qreal v2,qreal rasst){
 
 
     //угол вращения
@@ -275,7 +275,7 @@ void MovingEllipse::rotate(qreal v1,qreal v2,qreal rasst){
 
 
 
-void MovingEllipse::physics(MovingEllipse* other){
+void MovingFigure::physics(MovingFigure* other){
 
 //  if (std::abs(m_v_vert)>m_constants.c_g) m_moving=1; else m_moving=0;
      this->setTransformOriginPoint(center().x(),center().y());

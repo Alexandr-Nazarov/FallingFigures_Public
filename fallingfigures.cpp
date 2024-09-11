@@ -13,10 +13,30 @@ FallingFigures::FallingFigures(QWidget *parent)
     //scene->create_frame_of_scene();
     ui->graphicsView->scale(1,-1);
 
-    ui->radioButton_Rect->pressed();
-    ui->radioButton_Rect->setChecked(true);
+   // ui->radioButton_Circle->pressed();
+   // ui->radioButton_Circle->setChecked(true);
 
     QObject::connect(ui->clearButton , SIGNAL(clicked()), scene, SLOT(refresh()));
+
+   //----выбор фигуры
+
+    but_rect=new QRadioButton("Rect");
+    but_ellipse=new QRadioButton("Circle");
+    QButtonGroup *but_group=new QButtonGroup(this);
+    but_group->addButton(but_rect);
+    but_group->addButton(but_ellipse);
+     but_ellipse->setChecked(true);
+     ui->verticalLayout->addWidget(but_rect);
+     ui->verticalLayout->addWidget(but_ellipse);
+     ui->verticalLayout->addWidget(ui->clearButton);
+
+    QObject::connect(but_rect, SIGNAL (clicked()), this, SLOT (select_radbutton()));
+    QObject::connect(but_ellipse, SIGNAL (clicked()), this, SLOT (select_radbutton()));
+
+    QObject::connect(this, SIGNAL(selected_radbutton(ShapeType)), scene , SLOT(select_figure(ShapeType)));
+  //----
+
+
 
 }
 

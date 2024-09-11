@@ -12,13 +12,12 @@
 #include <QGraphicsLineItem>
 #include <QEvent>
 
+
 #include "fallingfigures.h"
 #include "mygraphicsitem.h"
+#include "movingellipse.h"
+#include "movingrect.h"
 #include "myevent.h"
-
-
-
-//class MyEvent;
 
 
 class Scene : public QGraphicsScene
@@ -46,6 +45,8 @@ QTimer *m_timer;
 QPointF  select_point;
 
 
+
+
 public:
     explicit Scene(qreal, qreal, QWidget *parent = nullptr);
 
@@ -71,6 +72,8 @@ void create_frame_of_scene();
 void slot_to_check_collides(QAbstractGraphicsShapeItem*);   //проверка на столкновения при авто-движении
 
 void addp(QPoint& point){m_point->setX(point.x());m_point->setY(point.y()); }
+
+void select_figure(ShapeType type) {drawing_figure=type;}
 
 // QGraphicsScene interface
 protected:

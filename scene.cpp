@@ -56,18 +56,21 @@ void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)
            m_startPoint.setX(event->scenePos().x());
            m_startPoint.setY(event->scenePos().y());
 
-      //+     if (drawing_figure==ShapeType::Rect){
-            m_current=new /*QGraphicsRectItem*/MovingEllipse (m_startPoint.x(),m_startPoint.y(),0.,0./*,m_width,m_height*/);
+           if (drawing_figure==ShapeType::Ellips)
+            m_current=new /*QGraphicsRectItem*/MovingEllipse(m_startPoint.x(),m_startPoint.y(),0.,0.);
+           if (drawing_figure==ShapeType::Rect)
+            m_current=new /*QGraphicsRectItem*/MovingRect(m_startPoint.x(),m_startPoint.y(),0.,0.);
+
 
           QObject::connect(  this, SIGNAL(frame_height_width(qreal* ,qreal*)),
-                             static_cast<MovingEllipse*>(m_current), SLOT(set_m_frame_height_width(qreal*,qreal*)));
+                             static_cast<MovingFigure*>(m_current), SLOT(set_m_frame_height_width(qreal*,qreal*)));
           emit frame_height_width(&m_height,&m_width);
 
-          QObject::connect( static_cast<MovingEllipse*>(m_current), SIGNAL(position_to_check_collides(QAbstractGraphicsShapeItem*)),
+          QObject::connect( static_cast<MovingFigure*>(m_current), SIGNAL(position_to_check_collides(QAbstractGraphicsShapeItem*)),
                             this, SLOT(slot_to_check_collides(QAbstractGraphicsShapeItem*)));
 
             m_point=new QGraphicsEllipseItem(0,0,2,2);
-           QObject::connect(static_cast<MovingEllipse*>(m_current), SIGNAL(addpoint(QPoint&)),this,SLOT(addp(QPoint&)));
+           QObject::connect(static_cast<MovingFigure*>(m_current), SIGNAL(addpoint(QPoint&)),this,SLOT(addp(QPoint&)));
         //!   addItem(m_point);
         //   m_current->setSelected(true);
           //  m_current->setZValue(1);
@@ -120,11 +123,11 @@ void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
            selected_item_for_collides =qgraphicsitem_cast<QAbstractGraphicsShapeItem* >( itemAt(event->scenePos(), QTransform()));
            if (selected_item_for_collides!=m_frame && selected_item_for_collides){
-           static_cast<MovingEllipse*>(selected_item_for_collides)->Stop_moving();
+           static_cast<MovingFigure*>(selected_item_for_collides)->Stop_moving();
 
                  //для корректировки координат при перетаскивании
-               m_startPoint.setX(static_cast<MovingEllipse*>(selected_item_for_collides)->getX()-event->scenePos().x());
-               m_startPoint.setY(static_cast<MovingEllipse*>(selected_item_for_collides)->getY()-event->scenePos().y());
+               m_startPoint.setX(static_cast<MovingFigure*>(selected_item_for_collides)->getX()-event->scenePos().x());
+               m_startPoint.setY(static_cast<MovingFigure*>(selected_item_for_collides)->getY()-event->scenePos().y());
                  //---
            }
          //===
@@ -147,7 +150,7 @@ void Scene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
      //    if (drawing_figure==ShapeType::Rect){
         // qgraphicsitem_cast<QGraphicsRectItem*/*MyGraphicsItem*/>(m_current)->setRect(tmp_Rect.normalized());
-          static_cast<MovingEllipse*>(m_current)->SetRect(tmp_Rect.normalized());
+          static_cast<MovingFigure*>(m_current)->SetRect(tmp_Rect.normalized());
 
        //+      this->update();
       //   }
@@ -161,10 +164,10 @@ void Scene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
     //проверка на столкновение при перемещении мышкой
          if (!m_drawingInProcess && selected_item_for_collides){
-      //    qDebug()<<static_cast<MovingEllipse*>(selected_item_for_collides)->m_y;
+      //    qDebug()<<static_cast<MovingFigure*>(selected_item_for_collides)->m_y;
         slot_to_check_collides(selected_item_for_collides);
 
-        static_cast<MovingEllipse*>(selected_item_for_collides)->set_m_XY(
+        static_cast<MovingFigure*>(selected_item_for_collides)->set_m_XY(
                 event->scenePos().x()+m_startPoint.x(),
                 event->scenePos().y()+m_startPoint.y());
        //!!!! update();
@@ -183,21 +186,21 @@ void Scene::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
     if (m_drawingInProcess){
       m_drawingInProcess=false;
       selected_item_for_collides=nullptr;                       //для того, чтобы не запускалось движение
-    static_cast<MovingEllipse*>(m_current)-> Start_moving();
+    static_cast<MovingFigure*>(m_current)-> Start_moving();
 
     }
     //===
 
     //запуск движения перетаскиваемого объекта
     if (!m_drawingInProcess && selected_item_for_collides && selected_item_for_collides!=m_frame){
-    //    qDebug()<<static_cast<MovingEllipse*>(selected_item_for_collides)->m_y;
+    //    qDebug()<<static_cast<MovingFigure*>(selected_item_for_collides)->m_y;
         //корректировка координат вирт-рамки при перетаскивании
-  //+!      static_cast<MovingEllipse*>(selected_item_for_collides)->set_m_XY(
+  //+!      static_cast<MovingFigure*>(selected_item_for_collides)->set_m_XY(
   //+!              event->scenePos().x()-m_startPoint.x(), event->scenePos().y()-m_startPoint.y() );
   //+!    update();
         //---
 
-     static_cast<MovingEllipse*>(selected_item_for_collides)->Start_moving();
+     static_cast<MovingFigure*>(selected_item_for_collides)->Start_moving();
    // selected_item_for_collides->scenePos().x()
 
     }
@@ -215,7 +218,7 @@ void Scene::slot_to_check_collides(QAbstractGraphicsShapeItem* item)   //про�
            if((x!=item) && (x!=m_frame) && (x!=m_point) ) {                            //еще раз подумать и разобраться с рамкой(исчезновением фигур)
 
                     //тут
-               if (item->collidesWithItem(x,Qt::IntersectsItemShape)/* || x->collidesWithItem(item,Qt::IntersectsItemShape)*/) { /* && !static_cast<MovingEllipse*>(x)->isInside(static_cast<MovingEllipse*>(item))*/    //подумать, если заезжает фигура
+               if (item->collidesWithItem(x,Qt::IntersectsItemShape)/* || x->collidesWithItem(item,Qt::IntersectsItemShape)*/) { /* && !static_cast<MovingFigure*>(x)->isInside(static_cast<MovingFigure*>(item))*/    //подумать, если заезжает фигура
 
 //нужное    //       coord_Rect_1.intersects(coord_Rect_2)*/ /*(!intersection.isEmpty() && (intersection.width()<=1|| intersection.height()<=1 ))
                    /*QRectF coord_Rect_1=item->mapRectToScene(item->boundingRect());    //получаем координаты ограничивающих прям-к
@@ -224,10 +227,10 @@ void Scene::slot_to_check_collides(QAbstractGraphicsShapeItem* item)   //про�
 
 
                  //  qDebug()<<intersection ;                                                            //ДАЛЕЕ ПРОПИСАТЬ ФИЗИКУ
-                    if (x && item /*&& dynamic_cast<MovingEllipse*>(item) && dynamic_cast<MovingEllipse*>(x)*/) { // включить потом проверку
-                    static_cast<MovingEllipse*>(item)->physics(static_cast<MovingEllipse*>(x));
-                    //      static_cast<MovingEllipse*>(item)->Change_dy();
-                    //      static_cast<MovingEllipse*>(item)->Change_dx();
+                    if (x && item /*&& dynamic_cast<MovingFigure*>(item) && dynamic_cast<MovingFigure*>(x)*/) { // включить потом проверку
+                    static_cast<MovingFigure*>(item)->physics(static_cast<MovingFigure*>(x));
+                    //      static_cast<MovingFigure*>(item)->Change_dy();
+                    //      static_cast<MovingFigure*>(item)->Change_dx();
                     }
 
 

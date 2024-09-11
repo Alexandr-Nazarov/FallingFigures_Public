@@ -10,7 +10,7 @@ CONFIG += c++11
 # any Qt feature that has been marked deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
 # deprecated API in order to know how to port your code away from it.
-DEFINES += QT_DEPRECATED_WARNINGS                                         # ВАЖНО!!!!!!!!!!!!
+#DEFINES += QT_DEPRECATED_WARNINGS                                         # ВАЖНО!!!!!!!!!!!!
 DESTDIR= ./exe
 # You can also make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -20,15 +20,19 @@ DESTDIR= ./exe
 SOURCES += \
     main.cpp \
     fallingfigures.cpp \
+    movingrect.cpp \
     myevent.cpp \
     mygraphicsitem.cpp \
-    scene.cpp
+    scene.cpp \
+    movingellipse.cpp \
 
 HEADERS += \
-    fallingfigures.h \
-    myevent.h \
+    fallingfigures.h \    \
+    movingellipse.h \
+    movingrect.h \
     mygraphicsitem.h \
-    scene.h
+    scene.h \
+    movingellipse.h \
 
 FORMS += \
     fallingfigures.ui
