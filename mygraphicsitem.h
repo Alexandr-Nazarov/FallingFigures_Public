@@ -86,7 +86,7 @@ public:
 
 
 
-  void physics (MovingFigure *figure=0);  //для столкновений с другими или просто движение
+  virtual void physics (MovingFigure *figure=0);  //для столкновений с другими или просто движение
 
   virtual qreal getX() const  {return m_x;}
   virtual qreal getY() const  {return m_y;}
@@ -123,6 +123,8 @@ public:
     }
 
   virtual void paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override{
+
+       painter->setRenderHint(QPainter::Antialiasing,true); //сглаживание
 
        painter->setBrush(Qt::green);
        painter->drawEllipse(m_x,m_y,m_width,m_height);

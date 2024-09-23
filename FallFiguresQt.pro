@@ -23,6 +23,7 @@ SOURCES += \
     movingrect.cpp \
     myevent.cpp \
     mygraphicsitem.cpp \
+    plank.cpp \
     scene.cpp \
     movingellipse.cpp \
 
@@ -30,7 +31,9 @@ HEADERS += \
     fallingfigures.h \    \
     movingellipse.h \
     movingrect.h \
+    myevent.h \
     mygraphicsitem.h \
+    plank.h \
     scene.h \
     movingellipse.h \
 

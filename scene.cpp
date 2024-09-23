@@ -14,7 +14,8 @@ Scene::Scene(qreal width, qreal height, QWidget *parent) : QGraphicsScene(parent
 
     //===
 
-
+  //  plank=new Plank(50,50,100,100);
+  //  addItem(plank);
 }
 
 void Scene::create_frame_of_scene(){
@@ -131,7 +132,7 @@ void Scene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                  //---
            }
          //===
-         qDebug()<<selected_item_for_collides;
+      //   qDebug()<<selected_item_for_collides;
      }
 
         QGraphicsScene::mousePressEvent(event);
@@ -163,7 +164,7 @@ void Scene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
 
     //проверка на столкновение при перемещении мышкой
-         if (!m_drawingInProcess && selected_item_for_collides){
+         if (!m_drawingInProcess && selected_item_for_collides && selected_item_for_collides!=m_frame ){
       //    qDebug()<<static_cast<MovingFigure*>(selected_item_for_collides)->m_y;
         slot_to_check_collides(selected_item_for_collides);
 
@@ -215,7 +216,7 @@ void Scene::slot_to_check_collides(QAbstractGraphicsShapeItem* item)   //про�
 {
       if (/*!m_drawingInProcess &&*/ item && item!=m_frame ){
        for (auto x : this->items()){
-           if((x!=item) && (x!=m_frame) && (x!=m_point) ) {                            //еще раз подумать и разобраться с рамкой(исчезновением фигур)
+           if((x!=item) && (x!=m_frame) && (x!=m_point)) {                            //еще раз подумать и разобраться с рамкой(исчезновением фигур)
 
                     //тут
                if (item->collidesWithItem(x,Qt::IntersectsItemShape)/* || x->collidesWithItem(item,Qt::IntersectsItemShape)*/) { /* && !static_cast<MovingFigure*>(x)->isInside(static_cast<MovingFigure*>(item))*/    //подумать, если заезжает фигура

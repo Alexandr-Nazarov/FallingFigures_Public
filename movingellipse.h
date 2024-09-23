@@ -32,7 +32,9 @@ public:
 
     virtual void paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override {
 
-         painter->setBrush(Qt::green);
+         painter->setRenderHint(QPainter::Antialiasing,true); //сглаживание
+
+        painter->setBrush(Qt::green);
          painter->drawEllipse(this->getX(),this->getY(),this->getWidth(),this->getHeight()/*m_x,m_y,m_width,m_height*/);
        //  painter->drawRect(m_x,m_y,m_width,m_height);
 

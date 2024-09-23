@@ -19,6 +19,8 @@
 #include "movingrect.h"
 #include "myevent.h"
 
+#include "plank.h"
+
 
 class Scene : public QGraphicsScene
 {

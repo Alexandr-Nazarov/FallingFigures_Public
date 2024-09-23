@@ -141,7 +141,7 @@ void MovingFigure::rotate(qreal v1,qreal v2,qreal rasst){
     //---
 
      //-при остановке вращения
-     if (( std::abs(/*qRadiansToDegrees*/( m_vspom_angle))>0 && std::abs(/*qRadiansToDegrees*/( m_vspom_angle))<1)) {
+     if (( std::abs(/*qRadiansToDegrees*/( m_vspom_angle))>0 && std::abs(/*qRadiansToDegrees*/( m_vspom_angle))<0.01)) {
          if (m_height>=m_width) {
 
              if ((/*std::abs(std::fmod(m_angle_rotate,180))>0 &&*/ std::abs(std::fmod(m_angle_rotate,180))<90) ){

@@ -25,7 +25,8 @@ FallingFigures::FallingFigures(QWidget *parent)
     QButtonGroup *but_group=new QButtonGroup(this);
     but_group->addButton(but_rect);
     but_group->addButton(but_ellipse);
-     but_ellipse->setChecked(true);
+    // but_ellipse->setChecked(true);
+
      ui->verticalLayout->addWidget(but_rect);
      ui->verticalLayout->addWidget(but_ellipse);
      ui->verticalLayout->addWidget(ui->clearButton);
@@ -34,6 +35,8 @@ FallingFigures::FallingFigures(QWidget *parent)
     QObject::connect(but_ellipse, SIGNAL (clicked()), this, SLOT (select_radbutton()));
 
     QObject::connect(this, SIGNAL(selected_radbutton(ShapeType)), scene , SLOT(select_figure(ShapeType)));
+
+    but_ellipse->click();
   //----
 
 

@@ -30,15 +30,15 @@ public:
 
     virtual void paint (QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override {
 
+         painter->setRenderHint(QPainter::Antialiasing,true); //сглаживание
+
          painter->setBrush(Qt::red);
          painter->drawRect(this->getX(),this->getY(),this->getWidth(),this->getHeight()/*m_x,m_y,m_width,m_height*/);
 
 
          painter->setBrush(Qt::yellow);
-        // painter->drawRect(m_x,m_y,m_width,m_height);
          painter->drawRect(this->getX()+this->getWidth()/5,this->getY()+this->getHeight()/5,this->getWidth()/3,this->getHeight()/3);
 
-        // qDebug()<<this->getX()<<this->getY()<<this->getWidth()<<this->getHeight();
       }
 
 
